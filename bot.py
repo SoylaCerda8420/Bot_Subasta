@@ -626,8 +626,6 @@ async def on_ready():
     bot.add_view(MMPanelView())
     
     try:
-        
-        synced = await bot.tree.sync(guild=guild)
 
         print(
             f"✅ Comandos sincronizados: "
