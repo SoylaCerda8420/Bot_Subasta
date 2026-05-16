@@ -625,10 +625,10 @@ async def finalizar_subasta(subasta):
 
 @bot.event
 async def on_ready():
-    
+
     bot.add_view(TicketView())
     bot.add_view(MMPanelView())
-    
+
     try:
 
         synced = await bot.tree.sync()
@@ -639,7 +639,6 @@ async def on_ready():
         )
 
     except Exception as e:
-
         print(e)
 
     if not actualizar_contador.is_running():
