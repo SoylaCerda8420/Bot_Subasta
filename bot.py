@@ -627,8 +627,6 @@ async def on_ready():
     
     try:
         
-        guild = discord.Object(1504970892533436426)
-
         synced = await bot.tree.sync(guild=guild)
 
         print(
@@ -959,8 +957,8 @@ async def panelmm(
 @bot.tree.command(
     name="add",
     description="Agregar usuario al ticket",
-    guild=discord.Object(id=1504984695102767134)
 )
+
 async def add(
     interaction: discord.Interaction,
     usuario: discord.Member
