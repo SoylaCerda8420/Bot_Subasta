@@ -632,8 +632,6 @@ async def on_ready():
 
        guild = discord.Object(id=1504970892533436426)
 
-        bot.tree.clear_commands(guild=None)
-
         synced = await bot.tree.sync(guild=guild)
         
         print(
