@@ -243,6 +243,113 @@ cola_subastas = deque()
 cooldowns_subasta = {}
 
 # ==================================================
+# VIEW CONFIRMAR SUBASTA
+# ==================================================
+
+class ConfirmarSubastaView(discord.ui.View):
+
+    def __init__(self, subasta=None):
+        super().__init__(timeout=None)
+        self.subasta = subasta
+
+    @discord.ui.button(
+        emoji="👍",
+        style=discord.ButtonStyle.green,
+        custom_id="confirmar_subasta"
+    )
+    async def confirmar(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        # Protección si el bot reinició
+        if self.subasta is None:
+
+            return await interaction.response.send_message(
+                "❌ Esta subasta ya no está disponible.",
+                ephemeral=True
+            )
+
+        subasta = self.subasta
+
+        # Ya confirmada
+        if subasta.confirmada:
+
+            return await interaction.response.send_message(
+                "❌ Esta subasta ya fue confirmada.",
+                ephemeral=True
+            )
+
+        # Usuario ya confirmó
+        if interaction.user.id in subasta.confirmados:
+
+            return await interaction.response.send_message(
+                "❌ Ya confirmaste esta subasta.",
+                ephemeral=True
+            )
+
+        # Guardar confirmación
+        subasta.confirmados.add(
+            interaction.user.id
+        )
+
+        # Actualizar embed
+        try:
+
+            await subasta.mensaje.edit(
+                embed=crear_embed(
+                    subasta
+                ),
+                view=self
+            )
+
+        except:
+            pass
+
+        await interaction.response.send_message(
+            (
+                f"✅ Confirmaste la subasta "
+                f"({len(subasta.confirmados)}/4)"
+            ),
+            ephemeral=True
+        )
+
+        # Llegó a 4 confirmaciones
+        if (
+            len(subasta.confirmados)
+            >= subasta.confirmaciones_requeridas
+        ):
+
+            subasta.confirmada = True
+
+            # INICIAR TIEMPO
+            subasta.fin = (
+                datetime.utcnow()
+                + subasta.duracion
+            )
+
+            # Desactivar botón
+            button.disabled = True
+
+            try:
+
+                await subasta.mensaje.edit(
+                    embed=crear_embed(
+                        subasta
+                    ),
+                    view=self
+                )
+
+            except:
+                pass
+
+            await subasta.canal.send(
+                "✅ La subasta fue confirmada. "
+                "¡Comienza ahora!"
+            )
+            
+# ==================================================
 # CLASE SUBASTA
 # ==================================================
 
@@ -262,12 +369,20 @@ class Subasta:
         self.mejor_oferta = minimo
         self.mejor_postor = None
         self.duracion = duracion
-        self.fin = (
-            datetime.utcnow() + duracion
-        )
+
+        # El tiempo NO inicia aún
+        self.fin = None
+
         self.canal = canal
         self.mensaje = None
         self.finalizada = False
+
+        # NUEVO SISTEMA
+        self.confirmados = set()
+        self.confirmaciones_requeridas = 4
+        self.confirmada = False
+
+        self.creada_en = datetime.utcnow()
 
 # ==================================================
 # FORMATO DINERO
@@ -383,24 +498,78 @@ def crear_embed(subasta):
         inline=False
     )
 
-    embed.add_field(
-        name="⏳ Tiempo",
-        value=tiempo_restante(
-            subasta.fin
-        ),
-        inline=False
-    )
+    # =========================================
+    # SUBASTA EN ESPERA DE CONFIRMACIÓN
+    # =========================================
+
+    if not subasta.confirmada:
+
+        segundos_restantes = max(
+            0,
+            90 - int(
+                (
+                    datetime.utcnow()
+                    - subasta.creada_en
+                ).total_seconds()
+            )
+        )
+
+        minutos = (
+            segundos_restantes // 60
+        )
+
+        segundos = (
+            segundos_restantes % 60
+        )
+
+        embed.add_field(
+            name="👍 Confirmaciones",
+            value=(
+                f"{len(subasta.confirmados)}"
+                f"/4"
+            ),
+            inline=False
+        )
+
+        embed.add_field(
+            name="⏳ Tiempo para confirmar",
+            value=(
+                f"{minutos:02}:"
+                f"{segundos:02}"
+            ),
+            inline=False
+        )
+
+        embed.set_footer(
+            text=(
+                "Se necesitan "
+                "4 confirmaciones"
+            )
+        )
+
+    # =========================================
+    # SUBASTA CONFIRMADA
+    # =========================================
+
+    else:
+
+        embed.add_field(
+            name="⏳ Tiempo",
+            value=tiempo_restante(
+                subasta.fin
+            ),
+            inline=False
+        )
+
+        embed.set_footer(
+            text="Usa /pujar para ofertar"
+        )
 
     embed.set_image(
         url=subasta.imagen
     )
 
-    embed.set_footer(
-        text="Usa /pujar para ofertar"
-    )
-
     return embed
-
 # ==================================================
 # EMBED PUJA
 # ==================================================
@@ -487,7 +656,7 @@ def embed_finalizada(subasta):
 async def iniciar_siguiente_subasta():
 
     global subasta_activa
-    
+
     if len(cola_subastas) == 0:
 
         subasta_activa = None
@@ -495,13 +664,11 @@ async def iniciar_siguiente_subasta():
 
     subasta = cola_subastas.popleft()
 
-    subasta.fin = (
-        datetime.utcnow()
-        + subasta.duracion
-    )
-
     mensaje = await subasta.canal.send(
-        embed=crear_embed(subasta)
+        embed=crear_embed(subasta),
+        view=ConfirmarSubastaView(
+            subasta
+        )
     )
 
     subasta.mensaje = mensaje
@@ -657,6 +824,9 @@ async def on_ready():
 
     bot.add_view(TicketView())
     bot.add_view(MMPanelView())
+    bot.add_view(
+    ConfirmarSubastaView(None)
+)
 
     try:
 
@@ -788,14 +958,25 @@ async def subasta(
         duracion,
         interaction.channel
     )
+
     cooldowns_subasta[
         interaction.user.id
-    ] = datetime.utcnow() + timedelta(minutes=5)
+    ] = (
+        datetime.utcnow()
+        + timedelta(minutes=5)
+    )
+
+    # =========================================
+    # NO HAY SUBASTA ACTIVA
+    # =========================================
 
     if subasta_activa is None:
 
         mensaje = await interaction.channel.send(
             embed=crear_embed(
+                nueva_subasta
+            ),
+            view=ConfirmarSubastaView(
                 nueva_subasta
             )
         )
@@ -805,9 +986,13 @@ async def subasta(
         subasta_activa = nueva_subasta
 
         await interaction.response.send_message(
-            "✅ Subasta iniciada.",
+            "✅ Subasta creada. Esperando confirmaciones.",
             ephemeral=True
         )
+
+    # =========================================
+    # HAY COLA
+    # =========================================
 
     else:
 
@@ -822,7 +1007,6 @@ async def subasta(
 
             ephemeral=True
         )
-
 # ==================================================
 # PUJAR
 # ==================================================
@@ -848,6 +1032,20 @@ async def pujar(
         )
 
     subasta = subasta_activa
+
+# =========================================
+# SUBASTA NO CONFIRMADA
+# =========================================
+
+if not subasta.confirmada:
+
+    return await interaction.response.send_message(
+        (
+            "❌ La subasta aún no ha sido "
+            "confirmada por 4 usuarios."
+        ),
+        ephemeral=True
+    )
 
     # =========================================
     # NO PUJARSE A SI MISMO
@@ -1018,9 +1216,76 @@ async def revisar_subasta():
     if subasta_activa is None:
         return
 
-    if datetime.utcnow() >= subasta_activa.fin:
+    subasta = subasta_activa
 
-        subasta = subasta_activa
+    # =========================================
+    # SUBASTA NO CONFIRMADA
+    # =========================================
+
+    if not subasta.confirmada:
+
+        tiempo_espera = (
+            datetime.utcnow()
+            - subasta.creada_en
+        ).total_seconds()
+
+        # Actualizar embed
+        try:
+
+            await subasta.mensaje.edit(
+                embed=crear_embed(
+                    subasta
+                )
+            )
+
+        except:
+            pass
+
+        # 90 SEGUNDOS
+        if tiempo_espera >= 90:
+
+            subasta.finalizada = True
+
+            embed = discord.Embed(
+                title="❌ SUBASTA CANCELADA",
+                description=(
+                    "La subasta fue cancelada\n"
+                    "porque no consiguió\n"
+                    "4 confirmaciones a tiempo."
+                ),
+                color=discord.Color.red()
+            )
+
+            embed.set_image(
+                url=subasta.imagen
+            )
+
+            try:
+
+                await subasta.mensaje.edit(
+                    embed=embed,
+                    view=None
+                )
+
+            except:
+                pass
+
+            await subasta.canal.send(
+                "❌ La subasta terminó "
+                "sin confirmaciones."
+            )
+
+            subasta_activa = None
+
+            await iniciar_siguiente_subasta()
+
+        return
+
+    # =========================================
+    # SUBASTA CONFIRMADA
+    # =========================================
+
+    if datetime.utcnow() >= subasta.fin:
 
         subasta_activa = None
 
