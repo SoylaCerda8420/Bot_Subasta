@@ -632,7 +632,7 @@ async def on_ready():
 
        guild = discord.Object(id=1504970892533436426)
 
-        synced = await bot.tree.sync(guild=guild)
+       synced = await bot.tree.sync(guild=guild)
         
         print(
             f"✅ Comandos sincronizados: "
