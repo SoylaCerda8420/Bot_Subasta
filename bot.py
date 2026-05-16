@@ -10,7 +10,7 @@ import os
 # CONFIGURACIÓN
 # ==================================================
 
-TOKEN = "MTUwNDkxMjU2NjQ3OTIyNDkxMw.GPGZce.6qfX4RnOU65T92TWxAECWrhR7DjCljm7XLAQvw"
+TOKEN = os.getenv("TOKEN")
 
 STAFF_ROLE_ID = 1504949358850867240
 TICKET_CATEGORY_ID = 1504947777749389412
