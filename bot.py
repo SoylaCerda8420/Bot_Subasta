@@ -957,26 +957,22 @@ async def panelmm(
 # ==================================================
 
 @bot.tree.command(
-    name="panelmm",
-    description="Enviar panel middleman",
+    name="add",
+    description="Agregar usuario al ticket",
     guild=discord.Object(id=1504984695102767134)
 )
-
 async def add(
     interaction: discord.Interaction,
     usuario: discord.Member
 ):
 
     await interaction.channel.set_permissions(
-
         usuario,
-
         read_messages=True,
         send_messages=True
     )
 
     await interaction.response.send_message(
-
         f"✅ {usuario.mention} fue agregado al ticket."
     )
     
