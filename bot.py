@@ -15,6 +15,9 @@ TOKEN = os.getenv("TOKEN")
 STAFF_ROLE_ID = 1504977810479906908
 TICKET_CATEGORY_ID = 1505042121520975972
 MM_CATEGORY_ID = 1505042121520975972
+
+GUILD_ID = 1504970892533436426
+MY_GUILD = discord.Object(id=GUILD_ID)
 # ==================================================
 
 intents = discord.Intents.default()
@@ -675,7 +678,8 @@ async def on_ready():
 
 @bot.tree.command(
     name="subasta",
-    description="Crear subasta"
+    description="Crear subasta",
+    guild=MY_GUILD
 )
 
 @app_commands.describe(
@@ -760,7 +764,8 @@ async def subasta(
 
 @bot.tree.command(
     name="pujar",
-    description="Pujar"
+    description="Pujar",
+    guild=MY_GUILD
 )
 
 async def pujar(
@@ -855,7 +860,8 @@ async def pujar(
 
 @bot.tree.command(
     name="endsub",
-    description="Finalizar subasta"
+    description="Finalizar subasta",
+    guild=MY_GUILD
 )
 
 async def endsub(
@@ -939,7 +945,8 @@ async def revisar_subasta():
 
 @bot.tree.command(
     name="panelmm",
-    description="Enviar panel middleman"
+    description="Enviar panel middleman",
+    guild=MY_GUILD
 )
 
 async def panelmm(
@@ -977,6 +984,7 @@ async def panelmm(
 @bot.tree.command(
     name="add",
     description="Agregar usuario al ticket",
+    guild=MY_GUILD
 )
 
 async def add(
