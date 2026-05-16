@@ -258,97 +258,60 @@ class ConfirmarSubastaView(discord.ui.View):
         custom_id="confirmar_subasta"
     )
     async def confirmar(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button
-    ):
+    self,
+    interaction: discord.Interaction,
+    button: discord.ui.Button
+):
 
-        # Protección si el bot reinició
-        if self.subasta is None:
-
-            return await interaction.response.send_message(
-                "❌ Esta subasta ya no está disponible.",
-                ephemeral=True
-            )
-
-        subasta = self.subasta
-subasta = self.subasta
-
-# Ya confirmada
-if subasta.confirmada:
-
-    return await interaction.response.send_message(
-        "❌ Esta subasta ya fue confirmada.",
-        ephemeral=True
-    )
-
-# =========================================
-# OWNER PUEDE CONFIRMAR 4 VECES
-# =========================================
-
-es_owner = any(
-    role.id == OWNER_ROLE_ID
-    for role in interaction.user.roles
-)
-
-if not es_owner:
-
-    # Usuario normal = 1 confirmación
-    if interaction.user.id in subasta.confirmados:
+    # Protección si el bot reinició
+    if self.subasta is None:
 
         return await interaction.response.send_message(
-            "❌ Ya confirmaste esta subasta.",
+            "❌ Esta subasta ya no está disponible.",
             ephemeral=True
         )
 
-    subasta.confirmados.add(
-        interaction.user.id
+    subasta = self.subasta
+
+    # Ya confirmada
+    if subasta.confirmada:
+
+        return await interaction.response.send_message(
+            "❌ Esta subasta ya fue confirmada.",
+            ephemeral=True
+        )
+
+    # =========================================
+    # OWNER PUEDE CONFIRMAR 4 VECES
+    # =========================================
+
+    es_owner = any(
+        role.id == OWNER_ROLE_ID
+        for role in interaction.user.roles
     )
 
-else:
+    if not es_owner:
 
-    # Owner puede confirmar varias veces
-    subasta.confirmados.add(
-        f"{interaction.user.id}_{len(subasta.confirmados)}"
-    )
+        # Usuario normal solo 1 vez
+        if interaction.user.id in subasta.confirmados:
 
-# Actualizar embed
-try:
+            return await interaction.response.send_message(
+                "❌ Ya confirmaste esta subasta.",
+                ephemeral=True
+            )
 
-    await subasta.mensaje.edit(
-        embed=crear_embed(
-            subasta
-        ),
-        view=self
-    )
+        subasta.confirmados.add(
+            interaction.user.id
+        )
 
-except:
-    pass
+    else:
 
-await interaction.response.send_message(
-    (
-        f"✅ Confirmaste la subasta "
-        f"({len(subasta.confirmados)}/4)"
-    ),
-    ephemeral=True
-)
-       # Llegó a 4 confirmaciones
-if (
-    len(subasta.confirmados)
-    >= subasta.confirmaciones_requeridas
-):
+        # Owner puede confirmar varias veces
+        subasta.confirmados.add(
+            f"{interaction.user.id}_{len(subasta.confirmados)}"
+        )
 
-    subasta.confirmada = True
-
-    # INICIAR TIEMPO
-    subasta.fin = (
-        datetime.utcnow()
-        + subasta.duracion
-    )
-
-    # Desactivar botón
-    button.disabled = True
-
+    # Actualizar embed
     try:
 
         await subasta.mensaje.edit(
@@ -361,10 +324,47 @@ if (
     except:
         pass
 
-    await subasta.canal.send(
-        "✅ La subasta fue confirmada. "
-        "¡Comienza ahora!"
+    await interaction.response.send_message(
+        (
+            f"✅ Confirmaste la subasta "
+            f"({len(subasta.confirmados)}/4)"
+        ),
+        ephemeral=True
     )
+
+    # Llegó a 4 confirmaciones
+    if (
+        len(subasta.confirmados)
+        >= subasta.confirmaciones_requeridas
+    ):
+
+        subasta.confirmada = True
+
+        # Iniciar tiempo
+        subasta.fin = (
+            datetime.utcnow()
+            + subasta.duracion
+        )
+
+        # Desactivar botón
+        button.disabled = True
+
+        try:
+
+            await subasta.mensaje.edit(
+                embed=crear_embed(
+                    subasta
+                ),
+                view=self
+            )
+
+        except:
+            pass
+
+        await subasta.canal.send(
+            "✅ La subasta fue confirmada. "
+            "¡Comienza ahora!"
+        )
             
 # ==================================================
 # CLASE SUBASTA
