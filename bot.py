@@ -619,15 +619,11 @@ async def finalizar_subasta(subasta):
 # BOT LISTO
 # ==================================================
 
-@bot.event
-async def on_ready():
-    
-    bot.add_view(TicketView())
-    bot.add_view(MMPanelView())
-    
-    try:
+# ==================================================
+# BOT LISTO
+# ==================================================
 
-        @bot.event
+@bot.event
 async def on_ready():
     
     bot.add_view(TicketView())
@@ -637,25 +633,6 @@ async def on_ready():
 
         synced = await bot.tree.sync()
 
-        print(
-            f"✅ Comandos sincronizados: "
-            f"{len(synced)}"
-        )
-
-    except Exception as e:
-
-        print(e)
-
-    if not actualizar_contador.is_running():
-        actualizar_contador.start()
-
-    if not revisar_subasta.is_running():
-        revisar_subasta.start()
-
-    print(
-        f"✅ Bot conectado como "
-        f"{bot.user}"
-    )
         print(
             f"✅ Comandos sincronizados: "
             f"{len(synced)}"
