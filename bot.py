@@ -634,7 +634,7 @@ async def on_ready():
 
        synced = await bot.tree.sync(guild=guild)
         
-        print(
+       print(
             f"✅ Comandos sincronizados: "
             f"{len(synced)}"
         )
