@@ -630,21 +630,23 @@ async def on_ready():
 
     try:
 
-        guild = discord.Object(id=1504970892533436426)
+    guild = discord.Object(id=1504970892533436426)
 
-        # BORRAR comandos globales viejos
-        bot.tree.clear_commands(guild=None)
+    # ELIMINAR comandos globales
+    bot.tree.clear_commands(guild=None)
 
-        # SINCRONIZAR solo guild
-        synced = await bot.tree.sync(guild=guild)
+    await bot.tree.sync()
 
-        print(
-            f"✅ Comandos sincronizados: "
-            f"{len(synced)}"
-        )
+    # ELIMINAR comandos del servidor
+    bot.tree.clear_commands(guild=guild)
 
-    except Exception as e:
-        print(e)
+    # VOLVER A CARGAR comandos del servidor
+    synced = await bot.tree.sync(guild=guild)
+
+    print(f"✅ Sync completado: {len(synced)}")
+
+except Exception as e:
+    print(e)
 
     # =========================================
     # SINCRONIZAR CONTADORES
