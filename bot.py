@@ -1201,6 +1201,13 @@ async def actualizar_contador():
     if subasta_activa.finalizada:
         return
 
+    # =========================================
+    # SOLO ACTUALIZAR SI ESTÁ CONFIRMADA
+    # =========================================
+
+    if not subasta_activa.confirmada:
+        return
+
     try:
 
         await subasta_activa.mensaje.edit(
