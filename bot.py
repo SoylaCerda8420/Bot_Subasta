@@ -784,6 +784,9 @@ async def subasta(
         duracion,
         interaction.channel
     )
+    cooldowns_subasta[
+        interaction.user.id
+    ] = datetime.utcnow() + timedelta(minutes=5)
 
     if subasta_activa is None:
 
