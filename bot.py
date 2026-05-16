@@ -332,39 +332,39 @@ await interaction.response.send_message(
     ),
     ephemeral=True
 )
-        # Llegó a 4 confirmaciones
-        if (
-            len(subasta.confirmados)
-            >= subasta.confirmaciones_requeridas
-        ):
+       # Llegó a 4 confirmaciones
+if (
+    len(subasta.confirmados)
+    >= subasta.confirmaciones_requeridas
+):
 
-            subasta.confirmada = True
+    subasta.confirmada = True
 
-            # INICIAR TIEMPO
-            subasta.fin = (
-                datetime.utcnow()
-                + subasta.duracion
-            )
+    # INICIAR TIEMPO
+    subasta.fin = (
+        datetime.utcnow()
+        + subasta.duracion
+    )
 
-            # Desactivar botón
-            button.disabled = True
+    # Desactivar botón
+    button.disabled = True
 
-            try:
+    try:
 
-                await subasta.mensaje.edit(
-                    embed=crear_embed(
-                        subasta
-                    ),
-                    view=self
-                )
+        await subasta.mensaje.edit(
+            embed=crear_embed(
+                subasta
+            ),
+            view=self
+        )
 
-            except:
-                pass
+    except:
+        pass
 
-            await subasta.canal.send(
-                "✅ La subasta fue confirmada. "
-                "¡Comienza ahora!"
-            )
+    await subasta.canal.send(
+        "✅ La subasta fue confirmada. "
+        "¡Comienza ahora!"
+    )
             
 # ==================================================
 # CLASE SUBASTA
