@@ -484,35 +484,6 @@ async def iniciar_siguiente_subasta():
 
     global subasta_activa
     
-        ahora = datetime.utcnow()
-
-    if interaction.user.id in cooldowns_subasta:
-
-        tiempo_restante_cd = (
-            cooldowns_subasta[
-                interaction.user.id
-            ] - ahora
-        ).total_seconds()
-
-        if tiempo_restante_cd > 0:
-
-            minutos = int(
-                tiempo_restante_cd // 60
-            )
-
-            segundos = int(
-                tiempo_restante_cd % 60
-            )
-
-            return await interaction.response.send_message(
-
-                f"❌ Debes esperar "
-                f"{minutos}m {segundos}s "
-                f"para crear otra subasta.",
-
-                ephemeral=True
-            )
-
     if len(cola_subastas) == 0:
 
         subasta_activa = None
@@ -758,6 +729,35 @@ async def subasta(
 ):
 
     global subasta_activa
+
+    ahora = datetime.utcnow()
+
+    if interaction.user.id in cooldowns_subasta:
+
+        tiempo_restante_cd = (
+            cooldowns_subasta[
+                interaction.user.id
+            ] - ahora
+        ).total_seconds()
+
+        if tiempo_restante_cd > 0:
+
+            minutos = int(
+                tiempo_restante_cd // 60
+            )
+
+            segundos = int(
+                tiempo_restante_cd % 60
+            )
+
+            return await interaction.response.send_message(
+
+                f"❌ Debes esperar "
+                f"{minutos}m {segundos}s "
+                f"para crear otra subasta.",
+
+                ephemeral=True
+            )
 
     if monto_minimo < 1:
 
