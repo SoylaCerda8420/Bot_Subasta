@@ -272,49 +272,66 @@ class ConfirmarSubastaView(discord.ui.View):
             )
 
         subasta = self.subasta
+subasta = self.subasta
 
-        # Ya confirmada
-        if subasta.confirmada:
+# Ya confirmada
+if subasta.confirmada:
 
-            return await interaction.response.send_message(
-                "❌ Esta subasta ya fue confirmada.",
-                ephemeral=True
-            )
+    return await interaction.response.send_message(
+        "❌ Esta subasta ya fue confirmada.",
+        ephemeral=True
+    )
 
-        # Usuario ya confirmó
-        if interaction.user.id in subasta.confirmados:
+# =========================================
+# OWNER PUEDE CONFIRMAR 4 VECES
+# =========================================
 
-            return await interaction.response.send_message(
-                "❌ Ya confirmaste esta subasta.",
-                ephemeral=True
-            )
+es_owner = any(
+    role.id == OWNER_ROLE_ID
+    for role in interaction.user.roles
+)
 
-        # Guardar confirmación
-        subasta.confirmados.add(
-            interaction.user.id
-        )
+if not es_owner:
 
-        # Actualizar embed
-        try:
+    # Usuario normal = 1 confirmación
+    if interaction.user.id in subasta.confirmados:
 
-            await subasta.mensaje.edit(
-                embed=crear_embed(
-                    subasta
-                ),
-                view=self
-            )
-
-        except:
-            pass
-
-        await interaction.response.send_message(
-            (
-                f"✅ Confirmaste la subasta "
-                f"({len(subasta.confirmados)}/4)"
-            ),
+        return await interaction.response.send_message(
+            "❌ Ya confirmaste esta subasta.",
             ephemeral=True
         )
 
+    subasta.confirmados.add(
+        interaction.user.id
+    )
+
+else:
+
+    # Owner puede confirmar varias veces
+    subasta.confirmados.add(
+        f"{interaction.user.id}_{len(subasta.confirmados)}"
+    )
+
+# Actualizar embed
+try:
+
+    await subasta.mensaje.edit(
+        embed=crear_embed(
+            subasta
+        ),
+        view=self
+    )
+
+except:
+    pass
+
+await interaction.response.send_message(
+    (
+        f"✅ Confirmaste la subasta "
+        f"({len(subasta.confirmados)}/4)"
+    ),
+    ephemeral=True
+)
         # Llegó a 4 confirmaciones
         if (
             len(subasta.confirmados)
@@ -904,10 +921,47 @@ async def subasta(
 
     global subasta_activa
 
-    ahora = datetime.utcnow()
+   ahora = datetime.utcnow()
 
-    if interaction.user.id in cooldowns_subasta:
+# =========================================
+# OWNER SIN COOLDOWN
+# =========================================
 
+es_owner = any(
+    role.id == OWNER_ROLE_ID
+    for role in interaction.user.roles
+)
+
+if (
+    not es_owner
+    and interaction.user.id
+    in cooldowns_subasta
+):
+
+    tiempo_restante_cd = (
+        cooldowns_subasta[
+            interaction.user.id
+        ] - ahora
+    ).total_seconds()
+
+    if tiempo_restante_cd > 0:
+
+        minutos = int(
+            tiempo_restante_cd // 60
+        )
+
+        segundos = int(
+            tiempo_restante_cd % 60
+        )
+
+        return await interaction.response.send_message(
+
+            f"❌ Debes esperar "
+            f"{minutos}m {segundos}s "
+            f"para crear otra subasta.",
+
+            ephemeral=True
+        )
         tiempo_restante_cd = (
             cooldowns_subasta[
                 interaction.user.id
