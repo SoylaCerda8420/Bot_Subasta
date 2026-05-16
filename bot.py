@@ -13,8 +13,8 @@ import os
 TOKEN = os.getenv("TOKEN")
 
 STAFF_ROLE_ID = 1504977810479906908
-TICKET_CATEGORY_ID = 1505009979785220166
-MM_CATEGORY_ID = TU_ID
+TICKET_CATEGORY_ID = 1505042121520975972
+MM_CATEGORY_ID = 1505042121520975972
 # ==================================================
 
 intents = discord.Intents.default()
