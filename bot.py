@@ -628,23 +628,25 @@ async def on_ready():
     bot.add_view(TicketView())
     bot.add_view(MMPanelView())
 
-    try:
+   try:
 
-       guild = discord.Object(id=1504970892533436426)
-        
-       bot.tree.clear_commands(guild=None)
-        
-       await bot.tree.sync()
+    guild = discord.Object(id=1504970892533436426)
 
-       synced = await bot.tree.sync(guild=guild)
-        
-       print(
-            f"✅ Comandos sincronizados: "
-            f"{len(synced)}"
-        )
+    bot.tree.clear_commands(guild=None)
+    bot.tree.clear_commands(guild=guild)
 
-    except Exception as e:
-        print(e)
+    await bot.tree.sync()
+    await bot.tree.sync(guild=guild)
+
+    synced = await bot.tree.sync(guild=guild)
+
+    print(
+        f"✅ Comandos sincronizados: "
+        f"{len(synced)}"
+    )
+
+except Exception as e:
+    print(e)
 
     # =========================================
     # SINCRONIZAR CONTADORES
