@@ -921,71 +921,53 @@ async def subasta(
 
     global subasta_activa
 
-   ahora = datetime.utcnow()
+    ahora = datetime.utcnow()
 
-# =========================================
-# OWNER SIN COOLDOWN
-# =========================================
+    # =========================================
+    # VERIFICAR SI ES OWNER
+    # =========================================
 
-es_owner = any(
-    role.id == OWNER_ROLE_ID
-    for role in interaction.user.roles
-)
+    es_owner = any(
+        role.id == OWNER_ROLE_ID
+        for role in interaction.user.roles
+    )
 
-if (
-    not es_owner
-    and interaction.user.id
-    in cooldowns_subasta
-):
+    # =========================================
+    # COOLDOWN (EXCEPTO OWNER)
+    # =========================================
 
-    tiempo_restante_cd = (
-        cooldowns_subasta[
-            interaction.user.id
-        ] - ahora
-    ).total_seconds()
+    if not es_owner:
 
-    if tiempo_restante_cd > 0:
+        if interaction.user.id in cooldowns_subasta:
 
-        minutos = int(
-            tiempo_restante_cd // 60
-        )
+            tiempo_restante_cd = (
+                cooldowns_subasta[
+                    interaction.user.id
+                ] - ahora
+            ).total_seconds()
 
-        segundos = int(
-            tiempo_restante_cd % 60
-        )
+            if tiempo_restante_cd > 0:
 
-        return await interaction.response.send_message(
+                minutos = int(
+                    tiempo_restante_cd // 60
+                )
 
-            f"❌ Debes esperar "
-            f"{minutos}m {segundos}s "
-            f"para crear otra subasta.",
+                segundos = int(
+                    tiempo_restante_cd % 60
+                )
 
-            ephemeral=True
-        )
-        tiempo_restante_cd = (
-            cooldowns_subasta[
-                interaction.user.id
-            ] - ahora
-        ).total_seconds()
+                return await interaction.response.send_message(
 
-        if tiempo_restante_cd > 0:
+                    f"❌ Debes esperar "
+                    f"{minutos}m {segundos}s "
+                    f"para crear otra subasta.",
 
-            minutos = int(
-                tiempo_restante_cd // 60
-            )
+                    ephemeral=True
+                )
 
-            segundos = int(
-                tiempo_restante_cd % 60
-            )
-
-            return await interaction.response.send_message(
-
-                f"❌ Debes esperar "
-                f"{minutos}m {segundos}s "
-                f"para crear otra subasta.",
-
-                ephemeral=True
-            )
+    # =========================================
+    # VALIDAR MONTO
+    # =========================================
 
     if monto_minimo < 1:
 
@@ -993,6 +975,10 @@ if (
             "❌ El monto mínimo debe ser mayor a 0.",
             ephemeral=True
         )
+
+    # =========================================
+    # VALIDAR TIEMPO
+    # =========================================
 
     duracion = convertir_tiempo(
         tiempo
@@ -1005,6 +991,10 @@ if (
             ephemeral=True
         )
 
+    # =========================================
+    # CREAR SUBASTA
+    # =========================================
+
     nueva_subasta = Subasta(
         interaction.user,
         imagen.url,
@@ -1013,15 +1003,18 @@ if (
         interaction.channel
     )
 
-    cooldowns_subasta[
-        interaction.user.id
-    ] = (
-        datetime.utcnow()
-        + timedelta(minutes=5)
-    )
+    # Cooldown solo para no-owner
+    if not es_owner:
+
+        cooldowns_subasta[
+            interaction.user.id
+        ] = (
+            datetime.utcnow()
+            + timedelta(minutes=5)
+        )
 
     # =========================================
-    # NO HAY SUBASTA ACTIVA
+    # INICIAR O ENCOLAR
     # =========================================
 
     if subasta_activa is None:
@@ -1040,13 +1033,9 @@ if (
         subasta_activa = nueva_subasta
 
         await interaction.response.send_message(
-            "✅ Subasta creada. Esperando confirmaciones.",
+            "✅ Subasta creada. Esperando 4 confirmaciones.",
             ephemeral=True
         )
-
-    # =========================================
-    # HAY COLA
-    # =========================================
 
     else:
 
