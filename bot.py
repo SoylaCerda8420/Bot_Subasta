@@ -626,9 +626,10 @@ async def on_ready():
     bot.add_view(MMPanelView())
     
     try:
-    guild = discord.Object(1504970892533436426)
+        
+        guild = discord.Object(1504970892533436426)
 
-    synced = await bot.tree.sync(guild=guild)
+        synced = await bot.tree.sync(guild=guild)
 
         print(
             f"✅ Comandos sincronizados: "
