@@ -1025,7 +1025,7 @@ async def panelmm(
     )
 
     embed.set_image(
-        url="https://i.imgur.com/8Km9tLL.png"
+        url="https://cdn.discordapp.com/attachments/1466777456076914788/1505085081621102632/IMG_8404.png?ex=6a095736&is=6a0805b6&hm=4aee8067405d1061c988dd69e7f9d250741e1747f48d1d3ae86fb71351ef6814&"
     )
 
     await interaction.channel.send(
