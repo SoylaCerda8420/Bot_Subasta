@@ -619,10 +619,6 @@ async def finalizar_subasta(subasta):
 # BOT LISTO
 # ==================================================
 
-# ==================================================
-# BOT LISTO
-# ==================================================
-
 @bot.event
 async def on_ready():
 
@@ -641,6 +637,26 @@ async def on_ready():
     except Exception as e:
         print(e)
 
+    # =========================================
+    # SINCRONIZAR CONTADORES
+    # =========================================
+
+    global ticket_counter, mm_counter
+
+    guild = bot.guilds[0]
+
+    ticket_counter = len([
+        c for c in guild.channels
+        if c.name.startswith("ticket-")
+    ]) + 1
+
+    mm_counter = len([
+        c for c in guild.channels
+        if c.name.startswith("mm-")
+    ]) + 1
+
+    # =========================================
+
     if not actualizar_contador.is_running():
         actualizar_contador.start()
 
@@ -651,7 +667,6 @@ async def on_ready():
         f"✅ Bot conectado como "
         f"{bot.user}"
     )
-
 # ==================================================
 # SUBASTA
 # ==================================================
