@@ -621,8 +621,10 @@ async def finalizar_subasta(subasta):
 
 @bot.event
 async def on_ready():
-
+    
+    bot.add_view(TicketView())
     bot.add_view(MMPanelView())
+    
     try:
 
         synced = await bot.tree.sync()
@@ -911,7 +913,70 @@ async def revisar_subasta():
         await finalizar_subasta(
             subasta
         )
+# ==================================================
+# PANEL MM
+# ==================================================
 
+@bot.tree.command(
+    name="panelmm",
+    description="Enviar panel middleman"
+)
+
+async def panelmm(
+    interaction: discord.Interaction
+):
+
+    embed = discord.Embed(
+        title="✨ ¡Bienvenido al Middleman! ✨",
+        description=(
+            "📩 Si deseas un intermediario,\n"
+            "presiona el botón de abajo.\n\n"
+            "Te responderemos a la brevedad."
+        ),
+        color=discord.Color.gold()
+    )
+
+    embed.set_image(
+        url="https://i.imgur.com/8Km9tLL.png"
+    )
+
+    await interaction.channel.send(
+        embed=embed,
+        view=MMPanelView()
+    )
+
+    await interaction.response.send_message(
+        "✅ Panel enviado.",
+        ephemeral=True
+    )
+
+# ==================================================
+# ADD USER TICKET
+# ==================================================
+
+@bot.tree.command(
+    name="add",
+    description="Agregar usuario al ticket"
+)
+
+async def add(
+    interaction: discord.Interaction,
+    usuario: discord.Member
+):
+
+    await interaction.channel.set_permissions(
+
+        usuario,
+
+        read_messages=True,
+        send_messages=True
+    )
+
+    await interaction.response.send_message(
+
+        f"✅ {usuario.mention} fue agregado al ticket."
+    )
+    
 # ==================================================
 # INICIAR BOT
 # ==================================================
