@@ -1033,18 +1033,27 @@ async def pujar(
 
     subasta = subasta_activa
 
-# =========================================
-# SUBASTA NO CONFIRMADA
-# =========================================
+    # =========================================
+    # SUBASTA NO CONFIRMADA
+    # =========================================
 
-if not subasta.confirmada:
+    if not subasta.confirmada:
 
-    return await interaction.response.send_message(
-        (
-            "❌ La subasta aún no ha sido "
-            "confirmada por 4 usuarios."
-        ),
-        ephemeral=True
+        return await interaction.response.send_message(
+            (
+                "❌ La subasta aún no ha sido "
+                "confirmada por 4 usuarios."
+            ),
+            ephemeral=True
+        )
+
+    # =========================================
+    # NO PUJARSE A SI MISMO
+    # =========================================
+
+    es_owner_servidor = (
+        interaction.user.id ==
+        interaction.guild.owner_id
     )
 
     # =========================================
