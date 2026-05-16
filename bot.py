@@ -622,10 +622,6 @@ async def finalizar_subasta(subasta):
 # BOT LISTO
 # ==================================================
 
-# ==================================================
-# BOT LISTO
-# ==================================================
-
 @bot.event
 async def on_ready():
 
@@ -634,25 +630,21 @@ async def on_ready():
 
     try:
 
-    guild = discord.Object(id=1504970892533436426)
+        guild = discord.Object(id=1504970892533436426)
 
-    # OBTENER comandos globales
-    global_commands = await bot.tree.fetch_commands()
+        # BORRAR TODOS LOS COMANDOS GLOBALES
+        bot.tree.clear_commands(guild=None)
 
-    # BORRAR comandos globales uno por uno
-    for cmd in global_commands:
-        await bot.tree.remove_command(cmd.name)
+        # SINCRONIZAR BORRADO GLOBAL
+        await bot.tree.sync()
 
-    # SINCRONIZAR borrado global
-    await bot.tree.sync()
+        # SINCRONIZAR SOLO LOS DEL SERVIDOR
+        synced = await bot.tree.sync(guild=guild)
 
-    # SINCRONIZAR comandos SOLO del servidor
-    synced = await bot.tree.sync(guild=guild)
+        print(f"✅ Sync completado: {len(synced)}")
 
-    print(f"✅ Sync completado: {len(synced)}")
-
-except Exception as e:
-    print(e)
+    except Exception as e:
+        print(e)
 
     # =========================================
     # SINCRONIZAR CONTADORES
@@ -681,6 +673,8 @@ except Exception as e:
         revisar_subasta.start()
 
     print(f"✅ Bot conectado como {bot.user}")
+
+
 # ==================================================
 # SUBASTA
 # ==================================================
