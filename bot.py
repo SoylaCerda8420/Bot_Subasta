@@ -14,7 +14,7 @@ TOKEN = os.getenv("TOKEN")
 
 STAFF_ROLE_ID = 1504977810479906908
 TICKET_CATEGORY_ID = 1505009979785220166
-
+MM_CATEGORY_ID = TU_ID
 # ==================================================
 
 intents = discord.Intents.default()
@@ -31,6 +31,7 @@ bot = commands.Bot(
 # ==================================================
 
 ticket_counter = 1
+mm_counter = 1
 
 # ==================================================
 # BOTONES TICKET
@@ -137,6 +138,90 @@ class TicketView(discord.ui.View):
         )
 
         await interaction.channel.delete()
+        class MMPanelView(discord.ui.View):
+
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="🧑‍💼 Middleman",
+        style=discord.ButtonStyle.red,
+        custom_id="create_mm_ticket"
+    )
+
+    async def crear_ticket(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        global mm_counter
+
+        guild = interaction.guild
+
+        categoria = guild.get_channel(
+            MM_CATEGORY_ID
+        )
+
+        overwrites = {
+
+            guild.default_role:
+                discord.PermissionOverwrite(
+                    read_messages=False
+                ),
+
+            interaction.user:
+                discord.PermissionOverwrite(
+                    read_messages=True,
+                    send_messages=True
+                )
+        }
+
+        staff_role = guild.get_role(
+            STAFF_ROLE_ID
+        )
+
+        if staff_role:
+
+            overwrites[staff_role] = (
+                discord.PermissionOverwrite(
+                    read_messages=True,
+                    send_messages=True
+                )
+            )
+
+        canal = await guild.create_text_channel(
+
+            name=f"mm-{mm_counter}",
+
+            category=categoria,
+
+            overwrites=overwrites
+        )
+
+        mm_counter += 1
+
+        embed = discord.Embed(
+            title="🧑‍💼 Ticket Middleman",
+            description=(
+                f"{interaction.user.mention} "
+                f"bienvenido a tu ticket."
+            ),
+            color=discord.Color.red()
+        )
+
+        await canal.send(
+            f"{interaction.user.mention}",
+            embed=embed,
+            view=TicketView()
+        )
+
+        await interaction.response.send_message(
+
+            f"✅ Ticket creado: {canal.mention}",
+
+            ephemeral=True
+        )
 
 # ==================================================
 # VARIABLES
