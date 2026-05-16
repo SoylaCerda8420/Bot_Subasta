@@ -13,6 +13,10 @@ import os
 TOKEN = os.getenv("TOKEN")
 
 STAFF_ROLE_ID = 1504977810479906908
+OWNER_ROLE_ID = 1504977810479906908
+ADMIN_ROLE_ID = 1504986891106259115
+MOD_ROLE_ID = 1504987741245538515
+MIDDLEMAN_ROLE_ID = 1505072146911727616
 TICKET_CATEGORY_ID = 1505042121520975972
 MM_CATEGORY_ID = 1505042121520975972
 
@@ -931,6 +935,29 @@ async def endsub(
 
     global subasta_activa
 
+    # =========================================
+    # PERMISOS
+    # OWNER / ADMIN / MOD
+    # =========================================
+
+    roles_permitidos = {
+        OWNER_ROLE_ID,
+        ADMIN_ROLE_ID,
+        MOD_ROLE_ID
+    }
+
+    tiene_permiso = any(
+        role.id in roles_permitidos
+        for role in interaction.user.roles
+    )
+
+    if not tiene_permiso:
+
+        return await interaction.response.send_message(
+            "❌ No tienes permisos para usar este comando.",
+            ephemeral=True
+        )
+
     if subasta_activa is None:
 
         return await interaction.response.send_message(
@@ -1052,6 +1079,30 @@ async def add(
     interaction: discord.Interaction,
     usuario: discord.Member
 ):
+
+    # =========================================
+    # PERMISOS
+    # OWNER / ADMIN / MOD / MIDDLEMAN
+    # =========================================
+
+    roles_permitidos = {
+        OWNER_ROLE_ID,
+        ADMIN_ROLE_ID,
+        MOD_ROLE_ID,
+        MIDDLEMAN_ROLE_ID
+    }
+
+    tiene_permiso = any(
+        role.id in roles_permitidos
+        for role in interaction.user.roles
+    )
+
+    if not tiene_permiso:
+
+        return await interaction.response.send_message(
+            "❌ No tienes permisos para usar este comando.",
+            ephemeral=True
+        )
 
     await interaction.channel.set_permissions(
         usuario,
