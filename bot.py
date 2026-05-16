@@ -236,6 +236,8 @@ class MMPanelView(discord.ui.View):
 subasta_activa = None
 cola_subastas = deque()
 
+cooldowns_subasta = {}
+
 # ==================================================
 # CLASE SUBASTA
 # ==================================================
@@ -277,23 +279,47 @@ def formatear_dinero(numero):
 
 def convertir_tiempo(texto):
 
-    match = re.match(
+    texto = texto.lower()
+
+    # SEGUNDOS
+    match_seg = re.match(
+        r"^(\d+)s$",
+        texto
+    )
+
+    if match_seg:
+
+        segundos = int(
+            match_seg.group(1)
+        )
+
+        if segundos < 1 or segundos > 300:
+            return None
+
+        return timedelta(
+            seconds=segundos
+        )
+
+    # MINUTOS
+    match_min = re.match(
         r"^(\d+)m$",
-        texto.lower()
+        texto
     )
 
-    if not match:
-        return None
+    if match_min:
 
-    minutos = int(
-        match.group(1)
-    )
+        minutos = int(
+            match_min.group(1)
+        )
 
-    if minutos < 1:
-        return None
+        if minutos < 1 or minutos > 5:
+            return None
 
-    return timedelta(minutes=minutos)
+        return timedelta(
+            minutes=minutos
+        )
 
+    return None
 # ==================================================
 # TIEMPO RESTANTE
 # ==================================================
@@ -457,6 +483,35 @@ def embed_finalizada(subasta):
 async def iniciar_siguiente_subasta():
 
     global subasta_activa
+    
+        ahora = datetime.utcnow()
+
+    if interaction.user.id in cooldowns_subasta:
+
+        tiempo_restante_cd = (
+            cooldowns_subasta[
+                interaction.user.id
+            ] - ahora
+        ).total_seconds()
+
+        if tiempo_restante_cd > 0:
+
+            minutos = int(
+                tiempo_restante_cd // 60
+            )
+
+            segundos = int(
+                tiempo_restante_cd % 60
+            )
+
+            return await interaction.response.send_message(
+
+                f"❌ Debes esperar "
+                f"{minutos}m {segundos}s "
+                f"para crear otra subasta.",
+
+                ephemeral=True
+            )
 
     if len(cola_subastas) == 0:
 
