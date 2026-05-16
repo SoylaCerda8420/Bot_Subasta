@@ -634,19 +634,25 @@ async def on_ready():
 
     try:
 
-        guild = discord.Object(id=1504970892533436426)
+    guild = discord.Object(id=1504970892533436426)
 
-        # BORRAR comandos globales antiguos
-        bot.tree.clear_commands(guild=None)
-        await bot.tree.sync()
+    # OBTENER comandos globales
+    global_commands = await bot.tree.fetch_commands()
 
-        # SINCRONIZAR solo comandos del servidor
-        synced = await bot.tree.sync(guild=guild)
+    # BORRAR comandos globales uno por uno
+    for cmd in global_commands:
+        await bot.tree.remove_command(cmd.name)
 
-        print(f"✅ Sync completado: {len(synced)}")
+    # SINCRONIZAR borrado global
+    await bot.tree.sync()
 
-    except Exception as e:
-        print(e)
+    # SINCRONIZAR comandos SOLO del servidor
+    synced = await bot.tree.sync(guild=guild)
+
+    print(f"✅ Sync completado: {len(synced)}")
+
+except Exception as e:
+    print(e)
 
     # =========================================
     # SINCRONIZAR CONTADORES
