@@ -628,25 +628,23 @@ async def on_ready():
     bot.add_view(TicketView())
     bot.add_view(MMPanelView())
 
-   try:
+    try:
 
-    guild = discord.Object(id=1504970892533436426)
+        guild = discord.Object(id=1504970892533436426)
 
-    bot.tree.clear_commands(guild=None)
-    bot.tree.clear_commands(guild=guild)
+        # BORRAR comandos globales viejos
+        bot.tree.clear_commands(guild=None)
 
-    await bot.tree.sync()
-    await bot.tree.sync(guild=guild)
+        # SINCRONIZAR solo guild
+        synced = await bot.tree.sync(guild=guild)
 
-    synced = await bot.tree.sync(guild=guild)
+        print(
+            f"✅ Comandos sincronizados: "
+            f"{len(synced)}"
+        )
 
-    print(
-        f"✅ Comandos sincronizados: "
-        f"{len(synced)}"
-    )
-
-except Exception as e:
-    print(e)
+    except Exception as e:
+        print(e)
 
     # =========================================
     # SINCRONIZAR CONTADORES
@@ -654,15 +652,15 @@ except Exception as e:
 
     global ticket_counter, mm_counter
 
-    guild = bot.guilds[0]
+    guild_real = bot.guilds[0]
 
     ticket_counter = len([
-        c for c in guild.channels
+        c for c in guild_real.channels
         if c.name.startswith("ticket-")
     ]) + 1
 
     mm_counter = len([
-        c for c in guild.channels
+        c for c in guild_real.channels
         if c.name.startswith("mm-")
     ]) + 1
 
