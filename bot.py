@@ -957,8 +957,9 @@ async def panelmm(
 # ==================================================
 
 @bot.tree.command(
-    name="add",
-    description="Agregar usuario al ticket"
+    name="panelmm",
+    description="Enviar panel middleman",
+    guild=discord.Object(id=1504984695102767134)
 )
 
 async def add(
