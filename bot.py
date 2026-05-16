@@ -138,7 +138,8 @@ class TicketView(discord.ui.View):
         )
 
         await interaction.channel.delete()
-        class MMPanelView(discord.ui.View):
+        
+class MMPanelView(discord.ui.View):
 
     def __init__(self):
         super().__init__(timeout=None)
@@ -222,7 +223,6 @@ class TicketView(discord.ui.View):
 
             ephemeral=True
         )
-
 # ==================================================
 # VARIABLES
 # ==================================================
