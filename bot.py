@@ -800,15 +800,19 @@ async def finalizar_subasta(subasta):
 
         ticket_counter += 1
 
-        await ticket.send(
+        middleman_role = guild.get_role(
+    MIDDLEMAN_ROLE_ID
+)
 
-            f"🎉 Bienvenidos "
-            f"{subasta.owner.mention} "
-            f"y "
-            f"{subasta.mejor_postor.mention}"
+await ticket.send(
 
-        )
+    f"{middleman_role.mention}\n"
+    f"🎉 Bienvenidos "
+    f"{subasta.owner.mention} "
+    f"y "
+    f"{subasta.mejor_postor.mention}"
 
+)
         await ticket.send(
             embed=embed_finalizada(
                 subasta
