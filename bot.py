@@ -171,58 +171,50 @@ class MMPanelView(discord.ui.View):
             MM_CATEGORY_ID
         )
 
-       overwrites = {
+        # =========================================
+        # PERMISOS DEL TICKET
+        # =========================================
 
-    guild.default_role:
-        discord.PermissionOverwrite(
-            read_messages=False
-        ),
+        overwrites = {
 
-    interaction.user:
-        discord.PermissionOverwrite(
-            read_messages=True,
-            send_messages=True
-        )
-}
+            guild.default_role:
+                discord.PermissionOverwrite(
+                    read_messages=False
+                ),
 
-# =========================================
-# DAR ACCESO A STAFF
-# OWNER / ADMIN / MOD / MIDDLEMAN
-# =========================================
-
-roles_staff = [
-
-    OWNER_ROLE_ID,
-    ADMIN_ROLE_ID,
-    MOD_ROLE_ID,
-    MIDDLEMAN_ROLE_ID
-]
-
-for role_id in roles_staff:
-
-    role = guild.get_role(role_id)
-
-    if role:
-
-        overwrites[role] = (
-            discord.PermissionOverwrite(
-                read_messages=True,
-                send_messages=True
-            )
-        )
-
-        staff_role = guild.get_role(
-            STAFF_ROLE_ID
-        )
-
-        if staff_role:
-
-            overwrites[staff_role] = (
+            interaction.user:
                 discord.PermissionOverwrite(
                     read_messages=True,
                     send_messages=True
                 )
+        }
+
+        # =========================================
+        # OWNER / ADMIN / MOD / MIDDLEMAN
+        # =========================================
+
+        roles_staff = [
+
+            OWNER_ROLE_ID,
+            ADMIN_ROLE_ID,
+            MOD_ROLE_ID,
+            MIDDLEMAN_ROLE_ID
+        ]
+
+        for role_id in roles_staff:
+
+            role = guild.get_role(
+                role_id
             )
+
+            if role:
+
+                overwrites[role] = (
+                    discord.PermissionOverwrite(
+                        read_messages=True,
+                        send_messages=True
+                    )
+                )
 
         canal = await guild.create_text_channel(
 
