@@ -761,120 +761,122 @@ async def finalizar_subasta(subasta):
             f"Error enviando ganador: {e}"
         )
 
-    # =========================================
-    # CREAR TICKET
-    # =========================================
-
-    try:
-
-        guild = subasta.canal.guild
-
-        categoria = guild.get_channel(
-            TICKET_CATEGORY_ID
-        )
-
-        if categoria is None:
-
-            print(
-                "ERROR: categoría no encontrada"
-            )
-
-            return
-
-        overwrites = {
-
-    guild.default_role:
-        discord.PermissionOverwrite(
-            read_messages=False
-        ),
-
-    subasta.owner:
-        discord.PermissionOverwrite(
-            read_messages=True,
-            send_messages=True
-        ),
-
-    subasta.mejor_postor:
-        discord.PermissionOverwrite(
-            read_messages=True,
-            send_messages=True
-        )
-}
-
 # =========================================
-# OWNER / ADMIN / MOD / MIDDLEMAN
+# CREAR TICKET
 # =========================================
 
-roles_staff = [
+try:
 
-    OWNER_ROLE_ID,
-    ADMIN_ROLE_ID,
-    MOD_ROLE_ID,
-    MIDDLEMAN_ROLE_ID
-]
+    guild = subasta.canal.guild
 
-for role_id in roles_staff:
-
-    role = guild.get_role(
-        role_id
+    categoria = guild.get_channel(
+        TICKET_CATEGORY_ID
     )
 
-    if role:
+    if categoria is None:
 
-        overwrites[role] = (
+        print(
+            "ERROR: categoría no encontrada"
+        )
+
+        return
+
+    # =========================================
+    # PERMISOS DEL TICKET
+    # =========================================
+
+    overwrites = {
+
+        guild.default_role:
+            discord.PermissionOverwrite(
+                read_messages=False
+            ),
+
+        subasta.owner:
+            discord.PermissionOverwrite(
+                read_messages=True,
+                send_messages=True
+            ),
+
+        subasta.mejor_postor:
             discord.PermissionOverwrite(
                 read_messages=True,
                 send_messages=True
             )
+    }
+
+    # =========================================
+    # OWNER / ADMIN / MOD / MIDDLEMAN
+    # =========================================
+
+    roles_staff = [
+
+        OWNER_ROLE_ID,
+        ADMIN_ROLE_ID,
+        MOD_ROLE_ID,
+        MIDDLEMAN_ROLE_ID
+    ]
+
+    for role_id in roles_staff:
+
+        role = guild.get_role(
+            role_id
         )
 
-        ticket = await guild.create_text_channel(
+        if role:
 
-            name=f"ticket-{ticket_counter}",
+            overwrites[role] = (
+                discord.PermissionOverwrite(
+                    read_messages=True,
+                    send_messages=True
+                )
+            )
 
-            category=categoria,
+    ticket = await guild.create_text_channel(
 
-            overwrites=overwrites
-        )
+        name=f"ticket-{ticket_counter}",
 
-        ticket_counter += 1
+        category=categoria,
 
-        # =========================================
-        # ETIQUETA AUTOMÁTICA MIDDLEMAN
-        # =========================================
+        overwrites=overwrites
+    )
 
-        middleman_role = guild.get_role(
-            MIDDLEMAN_ROLE_ID
-        )
+    ticket_counter += 1
 
-        await ticket.send(
+    # =========================================
+    # ETIQUETAR MIDDLEMAN
+    # =========================================
 
-            f"{middleman_role.mention}\n"
-            f"🎉 Bienvenidos "
-            f"{subasta.owner.mention} "
-            f"y "
-            f"{subasta.mejor_postor.mention}"
+    middleman_role = guild.get_role(
+        MIDDLEMAN_ROLE_ID
+    )
 
-        )
+    await ticket.send(
 
-        await ticket.send(
-            embed=embed_finalizada(
-                subasta
-            ),
-            view=TicketView()
-        )
+        f"{middleman_role.mention}\n"
+        f"🎉 Bienvenidos "
+        f"{subasta.owner.mention} "
+        f"y "
+        f"{subasta.mejor_postor.mention}"
 
-        print(
-            "✅ Ticket creado correctamente"
-        )
+    )
 
-    except Exception as e:
+    await ticket.send(
+        embed=embed_finalizada(
+            subasta
+        ),
+        view=TicketView()
+    )
 
-        print(
-            f"ERROR CREANDO TICKET: {e}"
-        )
+    print(
+        "✅ Ticket creado correctamente"
+    )
 
-    await iniciar_siguiente_subasta()
+except Exception as e:
+
+    print(
+        f"ERROR CREANDO TICKET: {e}"
+    )
 
 # ==================================================
 # BOT LISTO
