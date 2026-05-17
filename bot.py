@@ -783,36 +783,50 @@ async def finalizar_subasta(subasta):
 
         overwrites = {
 
-            guild.default_role:
-                discord.PermissionOverwrite(
-                    read_messages=False
-                ),
+    guild.default_role:
+        discord.PermissionOverwrite(
+            read_messages=False
+        ),
 
-            subasta.owner:
-                discord.PermissionOverwrite(
-                    read_messages=True,
-                    send_messages=True
-                ),
+    subasta.owner:
+        discord.PermissionOverwrite(
+            read_messages=True,
+            send_messages=True
+        ),
 
-            subasta.mejor_postor:
-                discord.PermissionOverwrite(
-                    read_messages=True,
-                    send_messages=True
-                )
-        }
-
-        staff_role = guild.get_role(
-            STAFF_ROLE_ID
+    subasta.mejor_postor:
+        discord.PermissionOverwrite(
+            read_messages=True,
+            send_messages=True
         )
+}
 
-        if staff_role:
+# =========================================
+# OWNER / ADMIN / MOD / MIDDLEMAN
+# =========================================
 
-            overwrites[staff_role] = (
-                discord.PermissionOverwrite(
-                    read_messages=True,
-                    send_messages=True
-                )
+roles_staff = [
+
+    OWNER_ROLE_ID,
+    ADMIN_ROLE_ID,
+    MOD_ROLE_ID,
+    MIDDLEMAN_ROLE_ID
+]
+
+for role_id in roles_staff:
+
+    role = guild.get_role(
+        role_id
+    )
+
+    if role:
+
+        overwrites[role] = (
+            discord.PermissionOverwrite(
+                read_messages=True,
+                send_messages=True
             )
+        )
 
         ticket = await guild.create_text_channel(
 
