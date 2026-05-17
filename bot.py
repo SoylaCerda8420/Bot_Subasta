@@ -69,18 +69,26 @@ class TicketView(discord.ui.View):
         button: discord.ui.Button
     ):
 
-        staff_role = interaction.guild.get_role(
-            STAFF_ROLE_ID
+        roles_permitidos = {
+            OWNER_ROLE_ID,
+            ADMIN_ROLE_ID,
+            MOD_ROLE_ID,
+            MIDDLEMAN_ROLE_ID
+        }
+
+        tiene_permiso = any(
+            role.id in roles_permitidos
+            for role in interaction.user.roles
         )
 
-        if staff_role not in interaction.user.roles:
+if not tiene_permiso:
 
-            return await interaction.response.send_message(
+    return await interaction.response.send_message(
 
-                "❌ No eres staff.",
+        "❌ No tienes permisos para reclamar tickets.",
 
-                ephemeral=True
-            )
+        ephemeral=True
+    )
 
         # DESACTIVAR BOTÓN
 
