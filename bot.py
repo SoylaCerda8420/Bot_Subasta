@@ -50,76 +50,68 @@ class TicketView(discord.ui.View):
 
         super().__init__(timeout=None)
 
-# =========================================
-# RECLAMAR
-# =========================================
+    # =========================================
+    # RECLAMAR
+    # =========================================
 
-@discord.ui.button(
-    label="Reclamar Ticket",
-    style=discord.ButtonStyle.green,
-    custom_id="claim_ticket"
-)
-
-async def reclamar(
-
-    self,
-
-    interaction: discord.Interaction,
-
-    button: discord.ui.Button
-):
-
-    # ===== REFERENCIA 1 =====
-    # TODO esto va dentro de la función reclamar()
-
-    roles_permitidos = {
-        OWNER_ROLE_ID,
-        ADMIN_ROLE_ID,
-        MOD_ROLE_ID,
-        MIDDLEMAN_ROLE_ID
-    }
-
-    tiene_permiso = any(
-        role.id in roles_permitidos
-        for role in interaction.user.roles
+    @discord.ui.button(
+        label="Reclamar Ticket",
+        style=discord.ButtonStyle.green,
+        custom_id="claim_ticket"
     )
+    async def reclamar(
 
-    if not tiene_permiso:
+        self,
 
-        return await interaction.response.send_message(
+        interaction: discord.Interaction,
 
-            "❌ No tienes permisos para reclamar tickets.",
+        button: discord.ui.Button
+    ):
 
-            ephemeral=True
+        roles_permitidos = {
+            OWNER_ROLE_ID,
+            ADMIN_ROLE_ID,
+            MOD_ROLE_ID,
+            MIDDLEMAN_ROLE_ID
+        }
+
+        tiene_permiso = any(
+            role.id in roles_permitidos
+            for role in interaction.user.roles
         )
 
-    # ===== REFERENCIA 2 =====
-    # button.disabled debe estar alineado
-    # EXACTAMENTE al mismo nivel que roles_permitidos
+        if not tiene_permiso:
 
-    button.disabled = True
+            return await interaction.response.send_message(
 
-    button.label = (
-        f"Reclamado por "
-        f"{interaction.user.name}"
-    )
+                "❌ No tienes permisos para reclamar tickets.",
 
-    embed = discord.Embed(
-        title="📌 Ticket Reclamado",
-        description=(
-            f"{interaction.user.mention} "
-            f"reclamó este ticket."
-        ),
-        color=discord.Color.blue()
-    )
+                ephemeral=True
+            )
 
-    await interaction.response.edit_message(
-        view=self
-    )
+        button.disabled = True
 
-    await interaction.followup.send(
-        embed=embed
-    )
+        button.label = (
+            f"Reclamado por "
+            f"{interaction.user.name}"
+        )
+
+        embed = discord.Embed(
+            title="📌 Ticket Reclamado",
+            description=(
+                f"{interaction.user.mention} "
+                f"reclamó este ticket."
+            ),
+            color=discord.Color.blue()
+        )
+
+        await interaction.response.edit_message(
+            view=self
+        )
+
+        await interaction.followup.send(
+            embed=embed
+        )
 
     # =========================================
     # CERRAR
@@ -130,7 +122,6 @@ async def reclamar(
         style=discord.ButtonStyle.red,
         custom_id="close_ticket"
     )
-
     async def cerrar(
 
         self,
@@ -140,15 +131,23 @@ async def reclamar(
         button: discord.ui.Button
     ):
 
-        staff_role = interaction.guild.get_role(
-            STAFF_ROLE_ID
+        roles_permitidos = {
+            OWNER_ROLE_ID,
+            ADMIN_ROLE_ID,
+            MOD_ROLE_ID,
+            MIDDLEMAN_ROLE_ID
+        }
+
+        tiene_permiso = any(
+            role.id in roles_permitidos
+            for role in interaction.user.roles
         )
 
-        if staff_role not in interaction.user.roles:
+        if not tiene_permiso:
 
             return await interaction.response.send_message(
 
-                "❌ No eres staff.",
+                "❌ No tienes permisos para cerrar tickets.",
 
                 ephemeral=True
             )
