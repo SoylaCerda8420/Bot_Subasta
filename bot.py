@@ -50,71 +50,76 @@ class TicketView(discord.ui.View):
 
         super().__init__(timeout=None)
 
-    # =========================================
-    # RECLAMAR
-    # =========================================
+# =========================================
+# RECLAMAR
+# =========================================
 
-    @discord.ui.button(
-        label="Reclamar Ticket",
-        style=discord.ButtonStyle.green,
-        custom_id="claim_ticket"
+@discord.ui.button(
+    label="Reclamar Ticket",
+    style=discord.ButtonStyle.green,
+    custom_id="claim_ticket"
+)
+
+async def reclamar(
+
+    self,
+
+    interaction: discord.Interaction,
+
+    button: discord.ui.Button
+):
+
+    # ===== REFERENCIA 1 =====
+    # TODO esto va dentro de la función reclamar()
+
+    roles_permitidos = {
+        OWNER_ROLE_ID,
+        ADMIN_ROLE_ID,
+        MOD_ROLE_ID,
+        MIDDLEMAN_ROLE_ID
+    }
+
+    tiene_permiso = any(
+        role.id in roles_permitidos
+        for role in interaction.user.roles
     )
 
-    async def reclamar(
+    if not tiene_permiso:
 
-        self,
+        return await interaction.response.send_message(
 
-        interaction: discord.Interaction,
+            "❌ No tienes permisos para reclamar tickets.",
 
-        button: discord.ui.Button
-    ):
-
-        roles_permitidos = {
-            OWNER_ROLE_ID,
-            ADMIN_ROLE_ID,
-            MOD_ROLE_ID,
-            MIDDLEMAN_ROLE_ID
-        }
-
-        tiene_permiso = any(
-            role.id in roles_permitidos
-            for role in interaction.user.roles
+            ephemeral=True
         )
 
-if not tiene_permiso:
+    # ===== REFERENCIA 2 =====
+    # button.disabled debe estar alineado
+    # EXACTAMENTE al mismo nivel que roles_permitidos
 
-    return await interaction.response.send_message(
+    button.disabled = True
 
-        "❌ No tienes permisos para reclamar tickets.",
-
-        ephemeral=True
+    button.label = (
+        f"Reclamado por "
+        f"{interaction.user.name}"
     )
 
-        # DESACTIVAR BOTÓN
+    embed = discord.Embed(
+        title="📌 Ticket Reclamado",
+        description=(
+            f"{interaction.user.mention} "
+            f"reclamó este ticket."
+        ),
+        color=discord.Color.blue()
+    )
 
-        button.disabled = True
+    await interaction.response.edit_message(
+        view=self
+    )
 
-        button.label = (
-            f"Reclamado por "
-            f"{interaction.user.name}"
-        )
-
-        embed = discord.Embed(
-            title="📌 Ticket Reclamado",
-            description=(
-                f"{interaction.user.mention} "
-                f"reclamó este ticket."
-            ),
-            color=discord.Color.blue()
-        )
-
-        await interaction.response.edit_message(
-            view=self
-        )
-
-        await interaction.followup.send(
-            embed=embed
-        )
+    await interaction.followup.send(
+        embed=embed
+    )
 
     # =========================================
     # CERRAR
