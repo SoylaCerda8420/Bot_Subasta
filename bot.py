@@ -219,10 +219,15 @@ class MMPanelView(discord.ui.View):
             color=discord.Color.red()
         )
 
-        await canal.send(
+        middleman_role = guild.get_role(
+            MIDDLEMAN_ROLE_ID
+        )
+
+         await canal.send(
+            f"{middleman_role.mention}\n"
             f"{interaction.user.mention}",
-            embed=embed,
-            view=TicketView()
+                embed=embed,
+                view=TicketView()
         )
 
         await interaction.response.send_message(
