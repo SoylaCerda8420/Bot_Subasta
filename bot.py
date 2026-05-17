@@ -153,89 +153,92 @@ class MMPanelView(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(
-    label="🧑‍💼 Middleman",
-    style=discord.ButtonStyle.red,
-    custom_id="create_mm_ticket"
-)
-
-async def crear_ticket(
-    self,
-    interaction: discord.Interaction,
-    button: discord.ui.Button
-):
-
-    global mm_counter
-
-    guild = interaction.guild
-
-    categoria = guild.get_channel(
-        MM_CATEGORY_ID
+        label="🧑‍💼 Middleman",
+        style=discord.ButtonStyle.red,
+        custom_id="create_mm_ticket"
     )
+    async def crear_ticket(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
 
-    overwrites = {
+        global mm_counter
 
-        guild.default_role:
-            discord.PermissionOverwrite(
-                read_messages=False
-            ),
+        guild = interaction.guild
 
-        interaction.user:
-            discord.PermissionOverwrite(
-                read_messages=True,
-                send_messages=True
-            )
-    }
-
-    staff_role = guild.get_role(
-        STAFF_ROLE_ID
-    )
-
-    if staff_role:
-
-        overwrites[staff_role] = (
-            discord.PermissionOverwrite(
-                read_messages=True,
-                send_messages=True
-            )
+        categoria = guild.get_channel(
+            MM_CATEGORY_ID
         )
 
-    canal = await guild.create_text_channel(
+        overwrites = {
 
-        name=f"mm-{mm_counter}",
+            guild.default_role:
+                discord.PermissionOverwrite(
+                    read_messages=False
+                ),
 
-        category=categoria,
+            interaction.user:
+                discord.PermissionOverwrite(
+                    read_messages=True,
+                    send_messages=True
+                )
+        }
 
-        overwrites=overwrites
-    )
+        staff_role = guild.get_role(
+            STAFF_ROLE_ID
+        )
 
-    mm_counter += 1
+        if staff_role:
 
-    embed = discord.Embed(
-        title="🧑‍💼 Ticket Middleman",
-        description=(
-            f"{interaction.user.mention} "
-            f"bienvenido a tu ticket."
-        ),
-        color=discord.Color.red()
-    )
+            overwrites[staff_role] = (
+                discord.PermissionOverwrite(
+                    read_messages=True,
+                    send_messages=True
+                )
+            )
 
-    middleman_role = guild.get_role(
-        MIDDLEMAN_ROLE_ID
-    )
+        canal = await guild.create_text_channel(
 
-    await canal.send(
-        f"{middleman_role.mention}\n"
-        f"{interaction.user.mention}",
-        embed=embed,
-        view=TicketView()
-    )
+            name=f"mm-{mm_counter}",
 
-    await interaction.response.send_message(
+            category=categoria,
 
-        f"✅ Ticket creado: {canal.mention}",
+            overwrites=overwrites
+        )
 
-        ephemeral=True
-    )
+        mm_counter += 1
+
+        embed = discord.Embed(
+            title="🧑‍💼 Ticket Middleman",
+            description=(
+                f"{interaction.user.mention} "
+                f"bienvenido a tu ticket."
+            ),
+            color=discord.Color.red()
+        )
+
+        # =========================================
+        # ETIQUETAR MIDDLEMAN
+        # =========================================
+
+        middleman_role = guild.get_role(
+            MIDDLEMAN_ROLE_ID
+        )
+
+        await canal.send(
+            f"{middleman_role.mention}\n"
+            f"{interaction.user.mention}",
+            embed=embed,
+            view=TicketView()
+        )
+
+        await interaction.response.send_message(
+
+            f"✅ Ticket creado: {canal.mention}",
+
+            ephemeral=True
+        )
 
 # ==================================================
 # VARIABLES
