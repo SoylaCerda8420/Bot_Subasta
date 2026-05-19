@@ -168,14 +168,14 @@ class TicketView(discord.ui.View):
 
             try:
 
-        await mm_data.log_message.edit(
-            embed=embed_log_mm(
-                mm_data
-            )
-        )
+                await mm_data.log_message.edit(
+                    embed=embed_log_mm(
+                        mm_data
+                    )
+                )
 
-    except:
-        pass
+            except:
+                pass
 
         await interaction.followup.send(
             embed=embed
