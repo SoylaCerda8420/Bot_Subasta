@@ -1451,18 +1451,6 @@ async def revisar_subasta():
             - subasta.creada_en
         ).total_seconds()
 
-        # Actualizar embed
-        try:
-
-            await subasta.mensaje.edit(
-                embed=crear_embed(
-                    subasta
-                )
-            )
-
-        except:
-            pass
-
         # 90 SEGUNDOS
         if tiempo_espera >= 90:
 
