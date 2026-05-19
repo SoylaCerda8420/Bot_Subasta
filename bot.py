@@ -234,6 +234,11 @@ class TicketView(discord.ui.View):
                 interaction.user.mention
             )
 
+            subasta.ticket_cerrado_en = (
+                datetime.utcnow()
+                - timedelta(hours=4)
+            )
+
             try:
 
                 await (
@@ -579,12 +584,20 @@ class Subasta:
         self.reclamado_por = "Nadie"
         self.cerrado_por = "Nadie"
 
+        # Hora creación subasta
         self.creada_en = (
             datetime.utcnow()
             - timedelta(hours=4)
         )
 
+        # Hora fin subasta
         self.cerrada_en = None
+
+        # Hora creación ticket
+        self.ticket_creado_en = None
+
+        # Hora cierre ticket
+        self.ticket_cerrado_en = None
         
 # ==================================================
 # FORMATO DINERO
@@ -872,18 +885,22 @@ def embed_log_subasta(subasta):
     )
 
     embed.add_field(
-        name="🕒 Creada",
-        value=subasta.creada_en.strftime(
-            "%d/%m/%Y %H:%M:%S"
+        name="🕒 Ticket Creado",
+        value=(
+            subasta.ticket_creado_en.strftime(
+                "%d/%m/%Y %H:%M:%S"
+            )
+            if subasta.ticket_creado_en
+            else "No creado"
         ),
         inline=False
     )
 
-    if subasta.cerrada_en:
+    if subasta.ticket_cerrado_en:
 
         embed.add_field(
-            name="⏰ Finalizada",
-            value=subasta.cerrada_en.strftime(
+            name="⏰ Ticket Cerrado",
+            value=subasta.ticket_cerrado_en.strftime(
                 "%d/%m/%Y %H:%M:%S"
             ),
             inline=False
@@ -1101,6 +1118,11 @@ async def finalizar_subasta(subasta):
             category=categoria,
 
             overwrites=overwrites
+        )
+
+        subasta.ticket_creado_en = (
+            datetime.utcnow()
+            - timedelta(hours=4)
         )
 
         ticket_counter += 1
