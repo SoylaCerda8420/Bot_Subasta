@@ -613,38 +613,11 @@ def crear_embed(subasta):
 
     if not subasta.confirmada:
 
-        segundos_restantes = max(
-            0,
-            90 - int(
-                (
-                    datetime.utcnow()
-                    - subasta.creada_en
-                ).total_seconds()
-            )
-        )
-
-        minutos = (
-            segundos_restantes // 60
-        )
-
-        segundos = (
-            segundos_restantes % 60
-        )
-
-        embed.add_field(
+       embed.add_field(
             name="👍 Confirmaciones",
             value=(
                 f"{len(subasta.confirmados)}"
                 f"/4"
-            ),
-            inline=False
-        )
-
-        embed.add_field(
-            name="⏳ Tiempo para confirmar",
-            value=(
-                f"{minutos:02}:"
-                f"{segundos:02}"
             ),
             inline=False
         )
