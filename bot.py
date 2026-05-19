@@ -59,7 +59,10 @@ class MMData:
         self.reclamado_por = "Nadie"
         self.cerrado_por = "Nadie"
 
-        self.creado_en = datetime.utcnow()
+        self.creado_en = (
+            datetime.utcnow()
+            - timedelta(hours=4)
+        )
         self.cerrado_en = None
 
         self.log_message = None
@@ -257,6 +260,7 @@ class TicketView(discord.ui.View):
         
             mm_data.cerrado_en = (
                 datetime.utcnow()
+                - timedelta(hours=4)
             )
 
             try:
