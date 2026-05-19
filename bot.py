@@ -451,7 +451,7 @@ class ConfirmarSubastaView(discord.ui.View):
                 pass
 
             await subasta.canal.send(
-                "@here 🔨 SUBASTA ACTIVA"
+                "# @here 🔨 SUBASTA ACTIVA"
             )
             
 # ==================================================
