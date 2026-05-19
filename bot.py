@@ -613,7 +613,7 @@ def crear_embed(subasta):
 
     if not subasta.confirmada:
 
-       embed.add_field(
+        embed.add_field(
             name="👍 Confirmaciones",
             value=(
                 f"{len(subasta.confirmados)}"
