@@ -20,6 +20,13 @@ MIDDLEMAN_ROLE_ID = 1505072146911727616
 TICKET_CATEGORY_ID = 1505042121520975972
 MM_CATEGORY_ID = 1505042121520975972
 
+# ==================================================
+# LOGS
+# ==================================================
+
+SUBASTA_LOGS_ID = 1506091242126311424
+MM_LOGS_ID = 1506091344983228607
+
 GUILD_ID = 1504970892533436426
 MY_GUILD = discord.Object(id=GUILD_ID)
 # ==================================================
@@ -85,11 +92,37 @@ class TicketView(discord.ui.View):
             return await interaction.response.send_message(
 
                 "❌ No tienes permisos para reclamar tickets.",
-
+        
                 ephemeral=True
             )
 
         button.disabled = True
+
+        if hasattr(
+            interaction.channel,
+            "subasta_data"
+        ):
+
+            subasta = (
+                interaction.channel.subasta_data
+            )
+
+            subasta.reclamado_por = (
+                interaction.user.mention
+            )
+
+            try:
+
+                await (
+                    subasta.ticket_log_message
+                ).edit(
+                    embed=embed_log_subasta(
+                        subasta
+                    )
+                )
+
+            except:
+                pass
 
         button.label = (
             f"Reclamado por "
@@ -151,6 +184,32 @@ class TicketView(discord.ui.View):
 
                 ephemeral=True
             )
+
+        if hasattr(
+            interaction.channel,
+            "subasta_data"
+        ):
+
+            subasta = (
+                interaction.channel.subasta_data
+            )
+
+            subasta.cerrado_por = (
+                interaction.user.mention
+            )
+
+            try:
+
+                await (
+                    subasta.ticket_log_message
+                ).edit(
+                    embed=embed_log_subasta(
+                        subasta
+                    )
+                )
+
+            except:
+                pass
 
         await interaction.response.send_message(
             "🔒 Cerrando ticket..."
@@ -431,6 +490,10 @@ class Subasta:
         self.confirmados = set()
         self.confirmaciones_requeridas = 4
         self.confirmada = False
+        self.ticket_numero = None
+        self.ticket_log_message = None
+        self.reclamado_por = "Nadie"
+        self.cerrado_por = "Nadie""
 
         self.creada_en = datetime.utcnow()
 
@@ -700,6 +763,59 @@ def embed_finalizada(subasta):
     return embed
 
 # ==================================================
+# EMBED LOG SUBASTA
+# ==================================================
+
+def embed_log_subasta(subasta):
+
+    ganador = (
+        subasta.mejor_postor.mention
+        if subasta.mejor_postor
+        else "Nadie"
+    )
+
+    embed = discord.Embed(
+        title="📋 Registro de Subasta",
+        color=discord.Color.orange()
+    )
+
+    embed.add_field(
+        name="🎫 Ticket",
+        value=f"ticket-{subasta.ticket_numero}",
+        inline=False
+    )
+
+    embed.add_field(
+        name="👤 Subastador",
+        value=subasta.owner.mention,
+        inline=False
+    )
+
+    embed.add_field(
+        name="🏆 Ganador",
+        value=ganador,
+        inline=False
+    )
+
+    embed.add_field(
+        name="📌 Reclamado por",
+        value=subasta.reclamado_por,
+        inline=False
+    )
+
+    embed.add_field(
+        name="🔒 Cerrado por",
+        value=subasta.cerrado_por,
+        inline=False
+    )
+
+    embed.set_image(
+        url=subasta.imagen
+    )
+
+    return embed
+
+# ==================================================
 # INICIAR SIGUIENTE SUBASTA
 # ==================================================
 
@@ -855,6 +971,12 @@ async def finalizar_subasta(subasta):
 
         ticket_counter += 1
 
+        subasta.ticket_numero = (
+        ticket_counter - 1
+        )
+
+        ticket.subasta_data = subasta
+
         middleman_role = guild.get_role(
             MIDDLEMAN_ROLE_ID
         )
@@ -875,6 +997,22 @@ async def finalizar_subasta(subasta):
             ),
             view=TicketView()
         )
+
+        canal_logs = guild.get_channel(
+            SUBASTA_LOGS_ID
+        )
+
+        if canal_logs:
+
+            log_msg = await canal_logs.send(
+                embed=embed_log_subasta(
+                    subasta
+                )
+            )
+
+            subasta.ticket_log_message = (
+                log_msg
+            )
 
         print(
             "✅ Ticket creado correctamente"
