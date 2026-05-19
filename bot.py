@@ -579,8 +579,13 @@ class Subasta:
         self.reclamado_por = "Nadie"
         self.cerrado_por = "Nadie"
 
-        self.creada_en = datetime.utcnow()
+        self.creada_en = (
+            datetime.utcnow()
+            - timedelta(hours=4)
+        )
 
+        self.cerrada_en = None
+        
 # ==================================================
 # FORMATO DINERO
 # ==================================================
@@ -846,7 +851,7 @@ def embed_log_subasta(subasta):
         name="👤 Subastador",
         value=subasta.owner.mention,
         inline=False
-    )
+     )
 
     embed.add_field(
         name="🏆 Ganador",
@@ -865,6 +870,24 @@ def embed_log_subasta(subasta):
         value=subasta.cerrado_por,
         inline=False
     )
+
+    embed.add_field(
+        name="🕒 Creada",
+        value=subasta.creada_en.strftime(
+            "%d/%m/%Y %H:%M:%S"
+        ),
+        inline=False
+    )
+
+    if subasta.cerrada_en:
+
+        embed.add_field(
+            name="⏰ Finalizada",
+            value=subasta.cerrada_en.strftime(
+                "%d/%m/%Y %H:%M:%S"
+            ),
+            inline=False
+        )
 
     embed.set_image(
         url=subasta.imagen
@@ -956,6 +979,11 @@ async def finalizar_subasta(subasta):
     global ticket_counter
 
     subasta.finalizada = True
+
+    subasta.cerrada_en = (
+        datetime.utcnow()
+        - timedelta(hours=4)
+    )
 
     try:
 
