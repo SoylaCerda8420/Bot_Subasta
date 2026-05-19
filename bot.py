@@ -259,7 +259,7 @@ class TicketView(discord.ui.View):
                 datetime.utcnow()
             )
 
-    try:
+            try:
 
                 await mm_data.log_message.edit(
                     embed=embed_log_mm(
