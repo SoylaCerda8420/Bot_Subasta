@@ -539,59 +539,6 @@ class ConfirmarSubastaView(discord.ui.View):
                 ephemeral=True
             )
 
-    # =========================================
-    # LLAMAR STAFF
-    # =========================================
-
-    @discord.ui.button(
-        label="⚠️ Solicitar Staff",
-        style=discord.ButtonStyle.blurple,
-        custom_id="solicitar_staff_subasta"
-    )
-    async def solicitar_staff(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button
-    ):
-
-        # Protección reinicio
-        if self.subasta is None:
-
-            return await interaction.response.send_message(
-                "❌ Esta subasta ya no existe.",
-                ephemeral=True
-            )
-
-        # SOLO EL CREADOR
-        if interaction.user != self.subasta.owner:
-
-            return await interaction.response.send_message(
-                "❌ Solo el creador de la subasta puede usar este botón.",
-                ephemeral=True
-            )
-
-        embed = discord.Embed(
-            title="⚠️ Solicitar Staff",
-            description=(
-                "Seguro que quieres llamar a un "
-                "Moderador o Administrador?\n\n"
-                "El mal uso de este botón "
-                "conlleva una sanción.\n"
-                "Úsalo solo si sabes que "
-                "tu subasta es de alto valor."
-            ),
-            color=discord.Color.orange()
-        )
-
-        await interaction.response.send_message(
-            embed=embed,
-            view=ConfirmarStaffView(
-                self.subasta
-            ),
-            ephemeral=True
-        )
-
-        
         # =========================================
         # OWNER PUEDE CONFIRMAR 4 VECES
         # =========================================
@@ -671,6 +618,59 @@ class ConfirmarSubastaView(discord.ui.View):
             await subasta.canal.send(
                 "# @here  🤑  SUBASTA ACTIVA"
             )
+    # =========================================
+    # LLAMAR STAFF
+    # =========================================
+
+    @discord.ui.button(
+        label="⚠️ Solicitar Staff",
+        style=discord.ButtonStyle.blurple,
+        custom_id="solicitar_staff_subasta"
+    )
+    async def solicitar_staff(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        # Protección reinicio
+        if self.subasta is None:
+
+            return await interaction.response.send_message(
+                "❌ Esta subasta ya no existe.",
+                ephemeral=True
+            )
+
+        # SOLO EL CREADOR
+        if interaction.user != self.subasta.owner:
+
+            return await interaction.response.send_message(
+                "❌ Solo el creador de la subasta puede usar este botón.",
+                ephemeral=True
+            )
+
+        embed = discord.Embed(
+            title="⚠️ Solicitar Staff",
+            description=(
+                "Seguro que quieres llamar a un "
+                "Moderador o Administrador?\n\n"
+                "El mal uso de este botón "
+                "conlleva una sanción.\n"
+                "Úsalo solo si sabes que "
+                "tu subasta es de alto valor."
+            ),
+            color=discord.Color.orange()
+        )
+
+        await interaction.response.send_message(
+            embed=embed,
+            view=ConfirmarStaffView(
+                self.subasta
+            ),
+            ephemeral=True
+        )
+
+        
             
 # ==================================================
 # CLASE SUBASTA
