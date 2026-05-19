@@ -184,14 +184,11 @@ class TicketView(discord.ui.View):
                 ephemeral=True
             )
 
-        if hasattr(
-            interaction.channel,
-            "subasta_data"
-        ):
+        if interaction.channel.id in tickets_subasta:
 
-            subasta = (
-                interaction.channel.subasta_data
-            )
+            subasta = tickets_subasta[
+                interaction.channel.id
+            ]
 
             subasta.cerrado_por = (
                 interaction.user.mention
@@ -337,7 +334,6 @@ cola_subastas = deque()
 
 cooldowns_subasta = {}
 
-tickets_subasta = {}
 
 # ==================================================
 # VIEW CONFIRMAR SUBASTA
