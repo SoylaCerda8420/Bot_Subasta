@@ -451,8 +451,7 @@ class ConfirmarSubastaView(discord.ui.View):
                 pass
 
             await subasta.canal.send(
-                "✅ La subasta fue confirmada. "
-                "¡Comienza ahora!"
+                "@here 🔨 SUBASTA ACTIVA"
             )
             
 # ==================================================
