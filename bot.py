@@ -48,7 +48,22 @@ ticket_counter = 1
 mm_counter = 1
 
 tickets_subasta = {}
+tickets_mm = {}
 
+class MMData:
+
+    def __init__(self, usuario):
+
+        self.usuario = usuario
+
+        self.reclamado_por = "Nadie"
+        self.cerrado_por = "Nadie"
+
+        self.creado_en = datetime.utcnow()
+        self.cerrado_en = None
+
+        self.log_message = None
+        
 # ==================================================
 # BOTONES TICKET
 # ==================================================
@@ -141,9 +156,31 @@ class TicketView(discord.ui.View):
             view=self
         )
 
+        if interaction.channel.id in tickets_mm:
+
+            mm_data = tickets_mm[
+                interaction.channel.id
+            ]
+
+            mm_data.reclamado_por = (
+                interaction.user.mention
+            )
+
+            try:
+
+        await mm_data.log_message.edit(
+            embed=embed_log_mm(
+                mm_data
+            )
+        )
+
+    except:
+        pass
+
         await interaction.followup.send(
             embed=embed
         )
+
 
     # =========================================
     # CERRAR
@@ -207,6 +244,33 @@ class TicketView(discord.ui.View):
             except:
                 pass
 
+
+        if interaction.channel.id in tickets_mm:
+
+            mm_data = tickets_mm[
+                interaction.channel.id
+            ]
+
+            mm_data.cerrado_por = (
+                interaction.user.mention
+            )
+        
+            mm_data.cerrado_en = (
+                datetime.utcnow()
+            )
+
+    try:
+
+                await mm_data.log_message.edit(
+                    embed=embed_log_mm(
+                        mm_data
+                    )
+                )
+
+            except:
+                pass
+
+        
         await interaction.response.send_message(
             "🔒 Cerrando ticket..."
         )
@@ -293,6 +357,26 @@ class MMPanelView(discord.ui.View):
         )
 
         mm_counter += 1
+
+        mm_data = MMData(
+            interaction.user
+        )
+
+        tickets_mm[canal.id] = mm_data
+
+        canal_logs = guild.get_channel(
+            MM_LOGS_ID
+        )
+
+        if canal_logs:
+
+            log_msg = await canal_logs.send(
+                embed=embed_log_mm(
+                    mm_data
+                )
+            )
+
+            mm_data.log_message = log_msg
 
         embed = discord.Embed(
             title="🧑‍💼 Ticket Middleman",
@@ -781,6 +865,55 @@ def embed_log_subasta(subasta):
     embed.set_image(
         url=subasta.imagen
     )
+
+    return embed
+
+# ==================================================
+# EMBED LOG MM
+# ==================================================
+
+def embed_log_mm(mm_data):
+
+    embed = discord.Embed(
+        title="🧑‍💼 Registro MM",
+        color=discord.Color.red()
+    )
+
+    embed.add_field(
+        name="👤 Solicitado por",
+        value=mm_data.usuario.mention,
+        inline=False
+    )
+
+    embed.add_field(
+        name="📌 Reclamado por",
+        value=mm_data.reclamado_por,
+        inline=False
+    )
+
+    embed.add_field(
+        name="🔒 Cerrado por",
+        value=mm_data.cerrado_por,
+        inline=False
+    )
+
+    embed.add_field(
+        name="🕒 Creado",
+        value=mm_data.creado_en.strftime(
+            "%d/%m/%Y %H:%M:%S"
+        ),
+        inline=False
+    )
+
+    if mm_data.cerrado_en:
+
+        embed.add_field(
+            name="⏰ Cerrado",
+            value=mm_data.cerrado_en.strftime(
+                "%d/%m/%Y %H:%M:%S"
+            ),
+            inline=False
+        )
 
     return embed
 
