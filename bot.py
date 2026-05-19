@@ -493,7 +493,7 @@ class Subasta:
         self.ticket_numero = None
         self.ticket_log_message = None
         self.reclamado_por = "Nadie"
-        self.cerrado_por = "Nadie""
+        self.cerrado_por = "Nadie"
 
         self.creada_en = datetime.utcnow()
 
