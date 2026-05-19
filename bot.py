@@ -1613,9 +1613,12 @@ async def revisar_subasta():
 
         tiempo_espera = (
             datetime.utcnow()
-            - subasta.creada_en
+            - (
+                subasta.creada_en
+                + timedelta(hours=4)
+            )
         ).total_seconds()
-
+        
         # 90 SEGUNDOS
         if tiempo_espera >= 90:
 
