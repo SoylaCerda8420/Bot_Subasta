@@ -513,7 +513,7 @@ class ConfirmarSubastaView(discord.ui.View):
     @discord.ui.button(
         emoji="👍",
         style=discord.ButtonStyle.green,
-        custom_id="confirmar_subasta"
+        custom_id="confirmar_subasta_v2"
     )
     async def confirmar(
         self,
@@ -546,7 +546,7 @@ class ConfirmarSubastaView(discord.ui.View):
     @discord.ui.button(
         label="⚠️ Solicitar Staff",
         style=discord.ButtonStyle.blurple,
-        custom_id="solicitar_staff"
+        custom_id="solicitar_staff_subasta"
     )
     async def solicitar_staff(
         self,
