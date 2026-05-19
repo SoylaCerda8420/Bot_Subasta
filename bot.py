@@ -47,6 +47,8 @@ bot = commands.Bot(
 ticket_counter = 1
 mm_counter = 1
 
+tickets_subasta = {}
+
 # ==================================================
 # BOTONES TICKET
 # ==================================================
@@ -98,14 +100,11 @@ class TicketView(discord.ui.View):
 
         button.disabled = True
 
-        if hasattr(
-            interaction.channel,
-            "subasta_data"
-        ):
+        if interaction.channel.id in tickets_subasta:
 
-            subasta = (
-                interaction.channel.subasta_data
-            )
+            subasta = tickets_subasta[
+                interaction.channel.id
+            ]
 
             subasta.reclamado_por = (
                 interaction.user.mention
@@ -337,6 +336,8 @@ subasta_activa = None
 cola_subastas = deque()
 
 cooldowns_subasta = {}
+
+tickets_subasta = {}
 
 # ==================================================
 # VIEW CONFIRMAR SUBASTA
@@ -975,7 +976,7 @@ async def finalizar_subasta(subasta):
         ticket_counter - 1
         )
 
-        ticket.subasta_data = subasta
+        tickets_subasta[ticket.id] = subasta
 
         middleman_role = guild.get_role(
             MIDDLEMAN_ROLE_ID
