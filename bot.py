@@ -838,45 +838,10 @@ def crear_embed(subasta):
         inline=False
     )
 
-    # =========================================
-    # SUBASTA EN ESPERA DE CONFIRMACIÓN
-    # =========================================
-
-    if not subasta.confirmada:
-
-        embed.add_field(
-            name="👍 Confirmaciones",
-            value=(
-                f"{len(subasta.confirmados)}"
-                f"/4"
-            ),
-            inline=False
-        )
-
-        embed.set_footer(
-            text=(
-                "Se necesitan "
-                "4 confirmaciones"
-            )
-        )
-
-    # =========================================
-    # SUBASTA CONFIRMADA
-    # =========================================
-
-    else:
-
-        embed.add_field(
-            name="⏳ Tiempo",
-            value=tiempo_restante(
-                subasta.fin
-            ),
-            inline=False
-        )
-
-        embed.set_footer(
-            text="Usa /pujar para ofertar"
-        )
+    embed.set_footer(
+        
+    text="Usa /pujar para ofertar"
+)
 
     embed.set_image(
         url=subasta.imagen
@@ -1708,7 +1673,6 @@ async def endsub(
 # ==================================================
 
 @tasks.loop(seconds=1)
-
 async def actualizar_contador():
 
     global subasta_activa
@@ -1716,27 +1680,43 @@ async def actualizar_contador():
     if subasta_activa is None:
         return
 
-    if subasta_activa.finalizada:
-        return
+    subasta = subasta_activa
 
-    # =========================================
-    # SOLO ACTUALIZAR SI ESTÁ CONFIRMADA
-    # =========================================
-
-    if not subasta_activa.confirmada:
+    if subasta.finalizada:
         return
 
     try:
 
-        await subasta_activa.mensaje.edit(
-            embed=crear_embed(
-                subasta_activa
+        # =========================================
+        # ESPERANDO CONFIRMACIONES
+        # =========================================
+
+        if not subasta.confirmada:
+
+            texto = (
+                f"👍 Confirmaciones: "
+                f"{len(subasta.confirmados)}/4\n"
+                f"⏳ Esperando confirmaciones..."
             )
+
+        # =========================================
+        # CONTADOR ACTIVO
+        # =========================================
+
+        else:
+
+            texto = (
+                f"⏳ Tiempo restante: "
+                f"{tiempo_restante(subasta.fin)}"
+            )
+
+        await subasta.contador_mensaje.edit(
+            content=texto
         )
 
-    except:
-        pass
-
+    except Exception as e:
+        print(f"Error contador: {e}")
+        
 # ==================================================
 # REVISAR TIEMPO
 # ==================================================
