@@ -698,6 +698,7 @@ class Subasta:
 
         self.canal = canal
         self.mensaje = None
+        self.contador_mensaje = None
         self.finalizada = False
 
         # NUEVO SISTEMA
@@ -1686,6 +1687,13 @@ async def actualizar_contador():
         return
 
     try:
+
+        # =========================================
+        # PROTECCIÓN
+        # =========================================
+
+        if subasta.contador_mensaje is None:
+            return
 
         # =========================================
         # ESPERANDO CONFIRMACIONES
