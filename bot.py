@@ -1458,25 +1458,35 @@ async def subasta(
     # INICIAR O ENCOLAR
     # =========================================
 
-    if subasta_activa is None:
+if subasta_activa is None:
 
-        mensaje = await interaction.channel.send(
-            embed=crear_embed(
-                nueva_subasta
-            ),
-            view=ConfirmarSubastaView(
-                nueva_subasta
-            )
+    mensaje = await interaction.channel.send(
+        embed=crear_embed(
+            nueva_subasta
+        ),
+        view=ConfirmarSubastaView(
+            nueva_subasta
         )
+    )
 
-        nueva_subasta.mensaje = mensaje
+    nueva_subasta.mensaje = mensaje
 
-        subasta_activa = nueva_subasta
+    # =========================================
+    # MENSAJE CONTADOR
+    # =========================================
 
-        await interaction.response.send_message(
-            "✅ Subasta creada. Esperando 4 confirmaciones.",
-            ephemeral=True
-        )
+    contador_msg = await interaction.channel.send(
+        "⏳ Tiempo: Esperando confirmaciones..."
+    )
+
+    nueva_subasta.contador_mensaje = contador_msg
+
+    subasta_activa = nueva_subasta
+
+    await interaction.response.send_message(
+        "✅ Subasta creada. Esperando 4 confirmaciones.",
+        ephemeral=True
+    )
 
     else:
 
@@ -1491,6 +1501,7 @@ async def subasta(
 
             ephemeral=True
         )
+        
 # ==================================================
 # PUJAR
 # ==================================================
