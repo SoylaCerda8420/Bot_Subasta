@@ -1454,53 +1454,54 @@ async def subasta(
             + timedelta(minutes=5)
         )
 
-   # =========================================
-   # INICIAR O ENCOLAR
-   # =========================================
-
-   if subasta_activa is None:
-
-       mensaje = await interaction.channel.send(
-           embed=crear_embed(
-               nueva_subasta
-           ),
-           view=ConfirmarSubastaView(
-               nueva_subasta
-           )
-       )
-
-       nueva_subasta.mensaje = mensaje
-
        # =========================================
-       # MENSAJE CONTADOR
-       # =========================================
+    # INICIAR O ENCOLAR
+    # =========================================
 
-       contador_msg = await interaction.channel.send(
-           "⏳ Tiempo: Esperando confirmaciones..."
-       )
+    if subasta_activa is None:
 
-       nueva_subasta.contador_mensaje = contador_msg
+        mensaje = await interaction.channel.send(
+            embed=crear_embed(
+                nueva_subasta
+            ),
+            view=ConfirmarSubastaView(
+                nueva_subasta
+            )
+        )
 
-       subasta_activa = nueva_subasta
+        nueva_subasta.mensaje = mensaje
 
-       await interaction.response.send_message(
-           "✅ Subasta creada. Esperando 4 confirmaciones.",
-           ephemeral=True
-       )
+        # =========================================
+        # MENSAJE CONTADOR
+        # =========================================
 
-   else:
+        contador_msg = await interaction.channel.send(
+            "⏳ Tiempo: Esperando confirmaciones..."
+        )
 
-       cola_subastas.append(
-           nueva_subasta
-       )
+        nueva_subasta.contador_mensaje = contador_msg
 
-       await interaction.response.send_message(
+        subasta_activa = nueva_subasta
 
-           f"📋 Subasta agregada a la cola.\n"
-           f"Posición: {len(cola_subastas)}",
+        await interaction.response.send_message(
+            "✅ Subasta creada. Esperando 4 confirmaciones.",
+            ephemeral=True
+        )
 
-           ephemeral=True
-       )
+    else:
+
+        cola_subastas.append(
+            nueva_subasta
+        )
+
+        await interaction.response.send_message(
+
+            f"📋 Subasta agregada a la cola.\n"
+            f"Posición: {len(cola_subastas)}",
+
+            ephemeral=True
+        )
+        
 # ==================================================
 # PUJAR
 # ==================================================
