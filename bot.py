@@ -1697,40 +1697,40 @@ async def actualizar_contador():
     if subasta.finalizada:
         return
 
+    # =========================================
+    # NO ACTUALIZAR SI NO ESTÁ CONFIRMADA
+    # =========================================
+
+    if not subasta.confirmada:
+        return
+
+    # =========================================
+    # PROTECCIÓN
+    # =========================================
+
+    if subasta.contador_mensaje is None:
+        return
+
     try:
 
-        # =========================================
-        # PROTECCIÓN
-        # =========================================
-
-        if subasta.contador_mensaje is None:
-            return
+        tiempo_actual = (
+            f"⏳ Tiempo restante: "
+            f"{tiempo_restante(subasta.fin)}"
+        )
 
         # =========================================
-        # ESPERANDO CONFIRMACIONES
+        # EVITAR EDITS REPETIDOS
         # =========================================
 
-        if not subasta.confirmada:
+        if hasattr(subasta, "ultimo_tiempo"):
 
-            texto = (
-                f"👍 Confirmaciones: "
-                f"{len(subasta.confirmados)}/4\n"
-                f"⏳ Esperando confirmaciones..."
-            )
+            if subasta.ultimo_tiempo == tiempo_actual:
+                return
 
-        # =========================================
-        # CONTADOR ACTIVO
-        # =========================================
-
-        else:
-
-            texto = (
-                f"⏳ Tiempo restante: "
-                f"{tiempo_restante(subasta.fin)}"
-            )
+        subasta.ultimo_tiempo = tiempo_actual
 
         await subasta.contador_mensaje.edit(
-            content=texto
+            content=tiempo_actual
         )
 
     except Exception as e:
