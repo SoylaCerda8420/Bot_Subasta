@@ -1454,54 +1454,53 @@ async def subasta(
             + timedelta(minutes=5)
         )
 
-    # =========================================
-    # INICIAR O ENCOLAR
-    # =========================================
+   # =========================================
+   # INICIAR O ENCOLAR
+   # =========================================
 
-if subasta_activa is None:
+   if subasta_activa is None:
 
-    mensaje = await interaction.channel.send(
-        embed=crear_embed(
-            nueva_subasta
-        ),
-        view=ConfirmarSubastaView(
-            nueva_subasta
-        )
-    )
+       mensaje = await interaction.channel.send(
+           embed=crear_embed(
+               nueva_subasta
+           ),
+           view=ConfirmarSubastaView(
+               nueva_subasta
+           )
+       )
 
-    nueva_subasta.mensaje = mensaje
+       nueva_subasta.mensaje = mensaje
 
-    # =========================================
-    # MENSAJE CONTADOR
-    # =========================================
+       # =========================================
+       # MENSAJE CONTADOR
+       # =========================================
 
-    contador_msg = await interaction.channel.send(
-        "⏳ Tiempo: Esperando confirmaciones..."
-    )
+       contador_msg = await interaction.channel.send(
+           "⏳ Tiempo: Esperando confirmaciones..."
+       )
 
-    nueva_subasta.contador_mensaje = contador_msg
+       nueva_subasta.contador_mensaje = contador_msg
 
-    subasta_activa = nueva_subasta
+       subasta_activa = nueva_subasta
 
-    await interaction.response.send_message(
-        "✅ Subasta creada. Esperando 4 confirmaciones.",
-        ephemeral=True
-    )
+       await interaction.response.send_message(
+           "✅ Subasta creada. Esperando 4 confirmaciones.",
+           ephemeral=True
+       )
 
-    else:
+   else:
 
-        cola_subastas.append(
-            nueva_subasta
-        )
+       cola_subastas.append(
+           nueva_subasta
+       )
 
-        await interaction.response.send_message(
+       await interaction.response.send_message(
 
-            f"📋 Subasta agregada a la cola.\n"
-            f"Posición: {len(cola_subastas)}",
+           f"📋 Subasta agregada a la cola.\n"
+           f"Posición: {len(cola_subastas)}",
 
-            ephemeral=True
-        )
-        
+           ephemeral=True
+       )
 # ==================================================
 # PUJAR
 # ==================================================
