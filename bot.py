@@ -710,6 +710,7 @@ class Subasta:
         self.confirmados = set()
         self.confirmaciones_requeridas = 4
         self.confirmada = False
+        self.ultimo_tiempo = None
         self.ticket_numero = None
         self.ticket_log_message = None
         self.reclamado_por = "Nadie"
@@ -843,6 +844,22 @@ def crear_embed(subasta):
         value=postor,
         inline=False
     )
+
+    if subasta.confirmada:
+
+        embed.add_field(
+            name="⏳ Tiempo",
+            value=f"<t:{int(subasta.fin.timestamp())}:R>",
+            inline=False
+        )
+
+    else:
+
+        embed.add_field(
+            name="⏳ Tiempo",
+            value="Esperando confirmaciones...",
+            inline=False
+        )
 
     if subasta.confirmada:
         embed.add_field(
@@ -1765,6 +1782,39 @@ async def revisar_subasta():
     # =========================================
     # SUBASTA CONFIRMADA
     # =========================================
+
+    # =========================================
+    # ÚLTIMO MINUTO
+    # =========================================
+
+    segundos = int(
+        (subasta.fin - datetime.utcnow()).total_seconds()
+    )
+
+    if 0 < segundos <= 60:
+
+        minutos = segundos // 60
+        seg = segundos % 60
+
+        tiempo = f"`{minutos:02}:{seg:02}`"
+
+        if getattr(subasta, "ultimo_tiempo", None) != tiempo:
+
+            subasta.ultimo_tiempo = tiempo
+
+            embed = crear_embed(subasta)
+
+            embed.set_field_at(
+                index=3,
+                name="⏳ Tiempo",
+                value=tiempo,
+                inline=False
+            )
+
+            try:
+                await subasta.mensaje.edit(embed=embed)
+            except:
+                pass
 
     if datetime.utcnow() >= subasta.fin:
 
