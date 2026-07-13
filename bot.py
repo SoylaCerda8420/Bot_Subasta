@@ -1797,7 +1797,7 @@ async def revisar_subasta():
             except:
                 pass
 
-    if datetime.utcnow() >= subasta.fin:
+    if segundos <= 0:
 
         subasta_activa = None
 
