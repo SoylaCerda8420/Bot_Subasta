@@ -602,6 +602,11 @@ class ConfirmarSubastaView(discord.ui.View):
                 + subasta.duracion
             )
 
+            await subasta.mensaje.edit(
+                embed=crear_embed(subasta),
+                view=self
+            )
+
             # Desactivar botón
             button.disabled = True
 
@@ -838,6 +843,19 @@ def crear_embed(subasta):
         value=postor,
         inline=False
     )
+
+    if subasta.confirmada:
+        embed.add_field(
+            name="⏳ Tiempo",
+            value=f"<t:{int(subasta.fin.timestamp())}:R>",
+            inline=False
+        )
+    else:
+        embed.add_field(
+            name="⏳ Tiempo",
+            value="Esperando confirmaciones...",
+            inline=False
+        )
 
     embed.set_footer(
         
@@ -1475,11 +1493,6 @@ async def subasta(
         # MENSAJE CONTADOR
         # =========================================
 
-        contador_msg = await interaction.channel.send(
-            "⏳ Tiempo: Esperando confirmaciones..."
-        )
-
-        nueva_subasta.contador_mensaje = contador_msg
 
         subasta_activa = nueva_subasta
 
@@ -1680,62 +1693,6 @@ async def endsub(
         ephemeral=True
     )
 
-# ==================================================
-# CONTADOR
-# ==================================================
-
-@tasks.loop(seconds=1)
-async def actualizar_contador():
-
-    global subasta_activa
-
-    if subasta_activa is None:
-        return
-
-    subasta = subasta_activa
-
-    if subasta.finalizada:
-        return
-
-    # =========================================
-    # NO ACTUALIZAR SI NO ESTÁ CONFIRMADA
-    # =========================================
-
-    if not subasta.confirmada:
-        return
-
-    # =========================================
-    # PROTECCIÓN
-    # =========================================
-
-    if subasta.contador_mensaje is None:
-        return
-
-    try:
-
-        tiempo_actual = (
-            f"⏳ Tiempo restante: "
-            f"{tiempo_restante(subasta.fin)}"
-        )
-
-        # =========================================
-        # EVITAR EDITS REPETIDOS
-        # =========================================
-
-        if hasattr(subasta, "ultimo_tiempo"):
-
-            if subasta.ultimo_tiempo == tiempo_actual:
-                return
-
-        subasta.ultimo_tiempo = tiempo_actual
-
-        await subasta.contador_mensaje.edit(
-            content=tiempo_actual
-        )
-
-    except Exception as e:
-        print(f"Error contador: {e}")
-        
 # ==================================================
 # REVISAR TIEMPO
 # ==================================================
