@@ -602,17 +602,12 @@ class ConfirmarSubastaView(discord.ui.View):
                 + subasta.duracion
             )
 
-            await subasta.mensaje.edit(
-                embed=crear_embed(subasta),
-                view=self
-            )
-
             # Desactivar botón
             button.disabled = True
 
             try:
 
-                await subasta.mensaje.edit(
+                  await subasta.mensaje.edit(
                     embed=crear_embed(subasta),
                     view=self
                 )
@@ -621,7 +616,7 @@ class ConfirmarSubastaView(discord.ui.View):
                 pass
 
             await subasta.canal.send(
-                "# @here  🤑  SUBASTA ACTIVA"
+                "# @here 🤑 SUBASTA ACTIVA"
             )
     # =========================================
     # LLAMAR STAFF
@@ -845,45 +840,31 @@ def crear_embed(subasta):
         inline=False
     )
 
-    if subasta.confirmada:
+       if subasta.confirmada:
 
-        embed.add_field(
-            name="⏳ Tiempo",
-            value=f"<t:{int(subasta.fin.timestamp())}:R>",
-            inline=False
+            embed.add_field(
+                name="⏳ Tiempo",
+                value=f"<t:{int(subasta.fin.timestamp())}:R>",
+                inline=False
+            )
+
+        else:
+
+            embed.add_field(
+                name="⏳ Tiempo",
+                value="Esperando confirmaciones...",
+                inline=False
+            )
+
+        embed.set_footer(
+            text="Usa /pujar para ofertar"
         )
 
-    else:
-
-        embed.add_field(
-            name="⏳ Tiempo",
-            value="Esperando confirmaciones...",
-            inline=False
+        embed.set_image(
+            url=subasta.imagen
         )
 
-    if subasta.confirmada:
-        embed.add_field(
-            name="⏳ Tiempo",
-            value=f"<t:{int(subasta.fin.timestamp())}:R>",
-            inline=False
-        )
-    else:
-        embed.add_field(
-            name="⏳ Tiempo",
-            value="Esperando confirmaciones...",
-            inline=False
-        )
-
-    embed.set_footer(
-        
-    text="Usa /pujar para ofertar"
-)
-
-    embed.set_image(
-        url=subasta.imagen
-    )
-
-    return embed
+        return embed
 # ==================================================
 # EMBED PUJA
 # ==================================================
@@ -1796,8 +1777,8 @@ async def revisar_subasta():
         minutos = segundos // 60
         seg = segundos % 60
 
-        tiempo = f"`{minutos:02}:{seg:02}`"
-
+        tiempo = f"⏰ `{minutos:02}:{seg:02}`"
+        
         if getattr(subasta, "ultimo_tiempo", None) != tiempo:
 
             subasta.ultimo_tiempo = tiempo
