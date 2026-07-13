@@ -840,31 +840,31 @@ def crear_embed(subasta):
         inline=False
     )
 
-       if subasta.confirmada:
+    if subasta.confirmada:
 
-            embed.add_field(
-                name="⏳ Tiempo",
-                value=f"<t:{int(subasta.fin.timestamp())}:R>",
-                inline=False
-            )
-
-        else:
-
-            embed.add_field(
-                name="⏳ Tiempo",
-                value="Esperando confirmaciones...",
-                inline=False
-            )
-
-        embed.set_footer(
-            text="Usa /pujar para ofertar"
+        embed.add_field(
+            name="⏳ Tiempo",
+            value=f"<t:{int(subasta.fin.timestamp())}:R>",
+            inline=False
         )
 
-        embed.set_image(
-            url=subasta.imagen
+    else:
+
+        embed.add_field(
+            name="⏳ Tiempo",
+            value="Esperando confirmaciones...",
+            inline=False
         )
 
-        return embed
+    embed.set_footer(
+        text="Usa /pujar para ofertar"
+    )
+
+    embed.set_image(
+        url=subasta.imagen
+    )
+
+    return embed
 # ==================================================
 # EMBED PUJA
 # ==================================================
