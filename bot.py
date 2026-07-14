@@ -1,4 +1,5 @@
 import discord
+import math
 from discord.ext import commands, tasks
 from discord import app_commands
 from datetime import datetime, timedelta
@@ -1768,7 +1769,6 @@ async def revisar_subasta():
     # ÚLTIMO MINUTO
     # =========================================
 
-    import math
 
     segundos = math.ceil(
         (subasta.fin - datetime.utcnow()).total_seconds()
@@ -1801,24 +1801,11 @@ async def revisar_subasta():
 
     if segundos <= 0:
 
-        try:
-            embed = crear_embed(subasta)
-
-            embed.set_field_at(
-                index=3,
-                name="⏳ Tiempo",
-                value="⏰ `00:00`",
-                inline=False
-            )
-
-            await subasta.mensaje.edit(embed=embed)
-
-        except:
-            pass
-    
         subasta_activa = None
 
         await finalizar_subasta(subasta)
+
+        return
 # ==================================================
 # PANEL MM
 # ==================================================
