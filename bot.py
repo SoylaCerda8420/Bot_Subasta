@@ -1801,8 +1801,14 @@ async def revisar_subasta():
 
     if segundos <= 0:
 
-        subasta_activa = None
+        print(f"AHORA: {datetime.utcnow()}")
+        print(f"FIN: {subasta.fin}")
+        print(f"SEGUNDOS: {segundos}")
 
+        subasta_activa = None
+        
+        print(">>> FINALIZANDO SUBASTA <<<")
+        
         await finalizar_subasta(subasta)
 
         return
