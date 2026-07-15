@@ -1623,9 +1623,23 @@ async def pujar(
 
     try:
 
-        await subasta.mensaje.edit(
-            embed=crear_embed(subasta)
+        embed = subasta.mensaje.embeds[0].copy()
+
+        embed.set_field_at(
+            index=1,
+            name="💰 Mayor Oferta",
+            value=f"${formatear_dinero(subasta.mejor_oferta)}",
+            inline=False
         )
+
+        embed.set_field_at(
+            index=2,
+            name="🏆 Mayor Postor",
+    value=interaction.user.mention,
+            inline=False
+        )
+
+        await subasta.mensaje.edit(embed=embed)
 
     except:
         pass
