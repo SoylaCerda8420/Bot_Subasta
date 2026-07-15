@@ -1766,51 +1766,48 @@ async def revisar_subasta():
 
         return
 
-        # =========================================
-        # SUBASTA CONFIRMADA
-        # =========================================
+    # =========================================
+    # SUBASTA CONFIRMADA
+    # =========================================
 
-        segundos = int(
-            (subasta.fin - datetime.utcnow()).total_seconds()
-        )
+    segundos = int(
+        (subasta.fin - datetime.utcnow()).total_seconds()
+    )
 
-        # Cambiar una sola vez al modo segundos
-        if (
-            segundos <= 60
-            and segundos > 0
-            and not subasta.modo_segundos
-        ):
+    # Cambiar al modo segundos cuando quede 1 minuto
+    if (
+        segundos <= 60
+        and segundos > 0
+        and not subasta.modo_segundos
+    ):
 
-            subasta.modo_segundos = True
-            subasta.ultimo_segundo = None
+        subasta.modo_segundos = True
+        subasta.ultimo_segundo = None
 
-        # Actualizar solamente cuando cambia el segundo
-        if (
-            subasta.modo_segundos
-            and segundos > 0
-            and subasta.ultimo_segundo != segundos
-        ):
+    # Actualizar solamente cuando cambia el segundo
+    if (
+        subasta.modo_segundos
+        and segundos > 0
+        and subasta.ultimo_segundo != segundos
+    ):
 
-            subasta.ultimo_segundo = segundos
+        subasta.ultimo_segundo = segundos
 
-            try:
+        try:
+            await subasta.mensaje.edit(
+                embed=crear_embed(subasta)
+            )
+        except Exception as e:
+            print(f"Error actualizando contador: {e}")
 
-                await subasta.mensaje.edit(
-                    embed=crear_embed(subasta)
-                )
+    # Finalizar subasta
+    if segundos <= 0:
 
-            except Exception as e:
-                print(f"Error actualizando contador: {e}")
+        subasta_activa = None
 
-        # Finalizar subasta
-        if datetime.utcnow() >= subasta.fin:
+        await finalizar_subasta(subasta)
 
-            subasta_activa = None
-
-            await finalizar_subasta(subasta)
-
-            return
-            
+        return
 # ==================================================
 # PANEL MM
 # ==================================================
