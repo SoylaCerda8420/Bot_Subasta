@@ -1775,28 +1775,28 @@ async def revisar_subasta():
         (subasta.fin - datetime.utcnow()).total_seconds()
     )
 
-        # Cambiar al modo segundos cuando quede 1 minuto
-        if (
-            segundos <= 60
-            and segundos > 0
-            and not subasta.modo_segundos
-        ):
+    # Cambiar al modo segundos cuando quede 1 minuto
+    if (
+        segundos <= 60
+        and segundos > 0
+        and not subasta.modo_segundos
+    ):
 
-            subasta.modo_segundos = True
-            subasta.ultimo_segundo = None
+        subasta.modo_segundos = True
+        subasta.ultimo_segundo = None
 
-            try:
+        try:
 
-                await subasta.mensaje_tiempo.edit(
-                    content=(
-                        "## ⏳ Tiempo restante\n"
-                        "# `01:00`"
-                    )
+            await subasta.mensaje_tiempo.edit(
+                content=(
+                    "## ⏳ Tiempo restante\n"
+                    "# `01:00`"
                 )
+            )
 
-            except Exception as e:
+        except Exception as e:
 
-                print(f"Error cambiando a modo segundos: {e}")
+            print(f"Error cambiando a modo segundos: {e}")
 
         # Actualizar solamente cuando cambia el segundo
         if (
