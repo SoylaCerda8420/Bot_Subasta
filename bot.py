@@ -602,6 +602,19 @@ class ConfirmarSubastaView(discord.ui.View):
                 + subasta.duracion
             )
 
+            try:
+
+                await subasta.mensaje_tiempo.edit(
+                    content=(
+                        "⏳ **Tiempo restante**\n"
+                        f"<t:{int(subasta.fin.timestamp())}:R>"
+                    )
+                )
+
+            except Exception as e:
+
+                print(f"Error actualizando mensaje de tiempo: {e}")
+
             # Desactivar botón
             button.disabled = True
 
@@ -706,6 +719,7 @@ class Subasta:
         self.confirmaciones_requeridas = 4
         self.confirmada = False
         self.modo_segundos = False
+        self.mensaje_tiempo = None
         self.ticket_numero = None
         self.ticket_log_message = None
         self.reclamado_por = "Nadie"
@@ -840,37 +854,6 @@ def crear_embed(subasta):
         inline=False
     )
 
-    if not subasta.confirmada:
-
-        embed.add_field(
-            name="⏳ Tiempo",
-            value="Esperando confirmaciones...",
-            inline=False
-        )
-
-    elif subasta.modo_segundos:
-
-        restante = max(
-            0,
-            int((subasta.fin - datetime.utcnow()).total_seconds())
-        )
-
-        minutos = restante // 60
-        segundos = restante % 60
-
-        embed.add_field(
-            name="⏳ Tiempo",
-            value=f"⏰ `{minutos:02}:{segundos:02}`",
-            inline=False
-        )
-
-    else:
-
-        embed.add_field(
-            name="⏳ Tiempo",
-            value=f"<t:{int(subasta.fin.timestamp())}:R>",
-            inline=False
-        )
         
     embed.set_footer(
         text="Usa /pujar para ofertar"
@@ -1106,6 +1089,10 @@ async def iniciar_siguiente_subasta():
         )
     )
 
+    subasta.mensaje_tiempo = await subasta.canal.send(
+        "⏳ **Esperando confirmaciones...**"
+    )
+
     subasta.mensaje = mensaje
 
     subasta_activa = subasta
@@ -1161,6 +1148,20 @@ async def finalizar_subasta(subasta):
 
         print(
             f"Error enviando ganador: {e}"
+        )
+
+    try:
+
+        if subasta.mensaje_tiempo is not None:
+
+            await subasta.mensaje_tiempo.edit(
+                content="## 🏁 Subasta finalizada"
+            )
+
+    except Exception as e:
+
+        print(
+            f"Error editando mensaje de tiempo: {e}"
         )
 
     # =========================================
@@ -1623,23 +1624,9 @@ async def pujar(
 
     try:
 
-        embed = subasta.mensaje.embeds[0].copy()
-
-        embed.set_field_at(
-            index=1,
-            name="💰 Mayor Oferta",
-            value=f"${formatear_dinero(subasta.mejor_oferta)}",
-            inline=False
+        await subasta.mensaje.edit(
+            embed=crear_embed(subasta)
         )
-
-        embed.set_field_at(
-            index=2,
-            name="🏆 Mayor Postor",
-    value=interaction.user.mention,
-            inline=False
-        )
-
-        await subasta.mensaje.edit(embed=embed)
 
     except:
         pass
@@ -1788,40 +1775,62 @@ async def revisar_subasta():
         (subasta.fin - datetime.utcnow()).total_seconds()
     )
 
-    # Cambiar al modo segundos cuando quede 1 minuto
-    if (
-        segundos <= 60
-        and segundos > 0
-        and not subasta.modo_segundos
-    ):
+        # Cambiar al modo segundos cuando quede 1 minuto
+        if (
+            segundos <= 60
+            and segundos > 0
+            and not subasta.modo_segundos
+        ):
 
-        subasta.modo_segundos = True
-        subasta.ultimo_segundo = None
+            subasta.modo_segundos = True
+            subasta.ultimo_segundo = None
 
-    # Actualizar solamente cuando cambia el segundo
-    if (
-        subasta.modo_segundos
-        and segundos > 0
-        and subasta.ultimo_segundo != segundos
-    ):
+            try:
 
-        subasta.ultimo_segundo = segundos
+                await subasta.mensaje_tiempo.edit(
+                    content=(
+                        "## ⏳ Tiempo restante\n"
+                        "# `01:00`"
+                    )
+                )
 
-        try:
-            await subasta.mensaje.edit(
-                embed=crear_embed(subasta)
-            )
-        except Exception as e:
-            print(f"Error actualizando contador: {e}")
+            except Exception as e:
 
-    # Finalizar subasta
-    if segundos <= 0:
+                print(f"Error cambiando a modo segundos: {e}")
 
-        subasta_activa = None
+        # Actualizar solamente cuando cambia el segundo
+        if (
+            subasta.modo_segundos
+            and segundos > 0
+            and subasta.ultimo_segundo != segundos
+        ):
 
-        await finalizar_subasta(subasta)
+            subasta.ultimo_segundo = segundos
 
-        return
+            minutos = segundos // 60
+            seg = segundos % 60
+
+            try:
+
+                await subasta.mensaje_tiempo.edit(
+                    content=(
+                        "## ⏳ Tiempo restante\n"
+                        f"# `{minutos:02}:{seg:02}`"
+                    )
+                )
+
+            except Exception as e:
+
+                print(f"Error actualizando contador: {e}")
+
+        # Finalizar subasta
+        if segundos <= 0:
+
+            subasta_activa = None
+
+            await finalizar_subasta(subasta)
+
+            return
 # ==================================================
 # PANEL MM
 # ==================================================
