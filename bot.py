@@ -1,5 +1,4 @@
 import discord
-import math
 from discord.ext import commands, tasks
 from discord import app_commands
 from datetime import datetime, timedelta
@@ -706,7 +705,6 @@ class Subasta:
         self.confirmados = set()
         self.confirmaciones_requeridas = 4
         self.confirmada = False
-        self.ultimo_tiempo = None
         self.ticket_numero = None
         self.ticket_log_message = None
         self.reclamado_por = "Nadie"
@@ -1341,9 +1339,6 @@ async def on_ready():
 
     # =========================================
 
-    if not actualizar_contador.is_running():
-        actualizar_contador.start()
-
     if not revisar_subasta.is_running():
         revisar_subasta.start()
 
@@ -1697,7 +1692,6 @@ async def endsub(
 # ==================================================
 
 @tasks.loop(seconds=1)
-
 async def revisar_subasta():
 
     global subasta_activa
@@ -1720,8 +1714,7 @@ async def revisar_subasta():
                 + timedelta(hours=4)
             )
         ).total_seconds()
-        
-        # 90 SEGUNDOS
+
         if tiempo_espera >= 90:
 
             subasta.finalizada = True
@@ -1736,23 +1729,18 @@ async def revisar_subasta():
                 color=discord.Color.red()
             )
 
-            embed.set_image(
-                url=subasta.imagen
-            )
+            embed.set_image(url=subasta.imagen)
 
             try:
-
                 await subasta.mensaje.edit(
                     embed=embed,
                     view=None
                 )
-
             except:
                 pass
 
             await subasta.canal.send(
-                "❌ La subasta terminó "
-                "sin confirmaciones."
+                "❌ La subasta terminó sin confirmaciones."
             )
 
             subasta_activa = None
@@ -1765,61 +1753,11 @@ async def revisar_subasta():
     # SUBASTA CONFIRMADA
     # =========================================
 
-    # =========================================
-    # ÚLTIMO MINUTO
-    # =========================================
+    if datetime.utcnow() >= subasta.fin:
 
-
-    segundos = math.ceil(
-        (subasta.fin - datetime.utcnow()).total_seconds()
-    )
-
-    print("=" * 40)
-    print("REVISANDO SUBASTA")
-    print("Confirmada:", subasta.confirmada)
-    print("Segundos:", segundos)
-    print("Mensaje:", subasta.mensaje.id if subasta.mensaje else "None")
-
-    if 0 < segundos <= 60:
-
-        minutos = segundos // 60
-        seg = segundos % 60
-
-        tiempo = f"⏰ `{minutos:02}:{seg:02}`"
-        
-        if getattr(subasta, "ultimo_tiempo", None) != tiempo:
-
-            subasta.ultimo_tiempo = tiempo
-
-            embed = crear_embed(subasta)
-
-            embed.set_field_at(
-                index=3,
-                name="⏳ Tiempo",
-                value=tiempo,
-                inline=False
-            )
-
-            try:
-                print("EDITANDO EMBED...")
-                await subasta.mensaje.edit(embed=embed)
-                print("EMBED EDITADO")
-            except Exception as e:
-                print("ERROR EDITANDO:", e)
-                
-    print("¿Debe finalizar?:", segundos <= 0)
-    
-    if segundos <= 0:
-
-        print(">>> FINALIZANDO SUBASTA <<<")
-        
         subasta_activa = None
-        
-        print(">>> FINALIZANDO SUBASTA <<<")
-        
-        await finalizar_subasta(subasta)
 
-        return
+        await finalizar_subasta(subasta)
 # ==================================================
 # PANEL MM
 # ==================================================
