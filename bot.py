@@ -1774,6 +1774,12 @@ async def revisar_subasta():
         (subasta.fin - datetime.utcnow()).total_seconds()
     )
 
+    print("=" * 40)
+    print("REVISANDO SUBASTA")
+    print("Confirmada:", subasta.confirmada)
+    print("Segundos:", segundos)
+    print("Mensaje:", subasta.mensaje.id if subasta.mensaje else "None")
+
     if 0 < segundos <= 60:
 
         minutos = segundos // 60
@@ -1795,16 +1801,18 @@ async def revisar_subasta():
             )
 
             try:
+                print("EDITANDO EMBED...")
                 await subasta.mensaje.edit(embed=embed)
-            except:
-                pass
-
+                print("EMBED EDITADO")
+            except Exception as e:
+                print("ERROR EDITANDO:", e)
+                
+    print("¿Debe finalizar?:", segundos <= 0)
+    
     if segundos <= 0:
 
-        print(f"AHORA: {datetime.utcnow()}")
-        print(f"FIN: {subasta.fin}")
-        print(f"SEGUNDOS: {segundos}")
-
+        print(">>> FINALIZANDO SUBASTA <<<")
+        
         subasta_activa = None
         
         print(">>> FINALIZANDO SUBASTA <<<")
