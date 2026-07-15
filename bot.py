@@ -705,6 +705,7 @@ class Subasta:
         self.confirmados = set()
         self.confirmaciones_requeridas = 4
         self.confirmada = False
+        self.modo_segundos = False
         self.ticket_numero = None
         self.ticket_log_message = None
         self.reclamado_por = "Nadie"
@@ -839,15 +840,7 @@ def crear_embed(subasta):
         inline=False
     )
 
-    if subasta.confirmada:
-
-        embed.add_field(
-            name="⏳ Tiempo",
-            value=f"<t:{int(subasta.fin.timestamp())}:R>",
-            inline=False
-        )
-
-    else:
+    if not subasta.confirmada:
 
         embed.add_field(
             name="⏳ Tiempo",
@@ -855,6 +848,30 @@ def crear_embed(subasta):
             inline=False
         )
 
+    elif subasta.modo_segundos:
+
+        restante = max(
+            0,
+            int((subasta.fin - datetime.utcnow()).total_seconds())
+        )
+
+        minutos = restante // 60
+        segundos = restante % 60
+
+        embed.add_field(
+            name="⏳ Tiempo",
+            value=f"⏰ `{minutos:02}:{segundos:02}`",
+            inline=False
+        )
+
+    else:
+
+        embed.add_field(
+            name="⏳ Tiempo",
+            value=f"<t:{int(subasta.fin.timestamp())}:R>",
+            inline=False
+        )
+        
     embed.set_footer(
         text="Usa /pujar para ofertar"
     )
@@ -1749,15 +1766,51 @@ async def revisar_subasta():
 
         return
 
-    # =========================================
-    # SUBASTA CONFIRMADA
-    # =========================================
+        # =========================================
+        # SUBASTA CONFIRMADA
+        # =========================================
 
-    if datetime.utcnow() >= subasta.fin:
+        segundos = int(
+            (subasta.fin - datetime.utcnow()).total_seconds()
+        )
 
-        subasta_activa = None
+        # Cambiar una sola vez al modo segundos
+        if (
+            segundos <= 60
+            and segundos > 0
+            and not subasta.modo_segundos
+        ):
 
-        await finalizar_subasta(subasta)
+            subasta.modo_segundos = True
+            subasta.ultimo_segundo = None
+
+        # Actualizar solamente cuando cambia el segundo
+        if (
+            subasta.modo_segundos
+            and segundos > 0
+            and subasta.ultimo_segundo != segundos
+        ):
+
+            subasta.ultimo_segundo = segundos
+
+            try:
+
+                await subasta.mensaje.edit(
+                    embed=crear_embed(subasta)
+                )
+
+            except Exception as e:
+                print(f"Error actualizando contador: {e}")
+
+        # Finalizar subasta
+        if datetime.utcnow() >= subasta.fin:
+
+            subasta_activa = None
+
+            await finalizar_subasta(subasta)
+
+            return
+            
 # ==================================================
 # PANEL MM
 # ==================================================
